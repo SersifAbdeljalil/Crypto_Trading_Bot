@@ -1,6 +1,6 @@
 """
 Trading bot with PPO Actor-Critic RL model integration
-Loads the trained CNN model from reinforcement_learning_trading_agent
+VERSION CORRIGÉE - Utilise les 20 features exactes de cryptoanalysis_data.csv
 """
 import websocket
 import json
@@ -12,7 +12,6 @@ import smtplib
 import numpy as np
 import requests
 import time
-from data_handler.get_hitorical_eth_data import get_data_onStart
 
 # TensorFlow/Keras imports
 import tensorflow as tf
@@ -39,7 +38,41 @@ else:
     raise FileNotFoundError("Environment file not found")
 
 # Model configuration
-MODEL_PATH = r"C:\BC\Reinforcement Learning\reinforcement_learning_trading_agent\2025_12_16_13_57_Crypto_trader"
+MODEL_PATH = r"C:\BC\Reinforcement_Learning\reinforcement_learning_trading_agent\2025_12_30_12_22_Crypto_trader"
+
+# Training data normalization parameters (loaded from cryptoanalysis_data.csv)
+# Ces valeurs DOIVENT correspondre à celles utilisées pendant l'entraînement
+TRAINING_CSV_PATH = r"C:\BC\Reinforcement_Learning\reinforcement_learning_trading_agent\cryptoanalysis_data.csv"
+
+def load_normalization_params():
+    """
+    Charge les paramètres de normalisation depuis le CSV d'entraînement.
+    CRITIQUE: La normalisation doit être IDENTIQUE à l'entraînement!
+    """
+    try:
+        df = pd.read_csv(TRAINING_CSV_PATH)
+        df = df.rename(columns={'price': 'Close', 'date': 'Date'})
+        
+        # Retire Close et Date comme dans main.py
+        df_for_norm = df.drop(['Close', 'Date'], axis=1)
+        
+        # Calcule min/max comme dans main.py (lignes 23-26)
+        column_maxes = df_for_norm.max()
+        df_max = column_maxes.max()
+        column_mins = df_for_norm.min()
+        df_min = column_mins.min()
+        
+        print(f"✓ Normalization parameters loaded:")
+        print(f"   Min: {df_min}")
+        print(f"   Max: {df_max}")
+        
+        return df_min, df_max
+    except Exception as e:
+        print(f"⚠ Could not load normalization params: {e}")
+        print("   Using default normalization per-window")
+        return None, None
+
+DF_MIN, DF_MAX = load_normalization_params()
 
 # Find the best model (highest reward)
 def find_best_model(path):
@@ -50,7 +83,6 @@ def find_best_model(path):
     if not actor_files:
         return None, None
     
-    # Extract scores from filenames (format: SCORE_Crypto_trader_Actor.weights.h5)
     best_score = -float('inf')
     best_file = None
     
@@ -61,7 +93,7 @@ def find_best_model(path):
                 best_score = score
                 best_file = f
         except:
-            if f.startswith('_'):  # Latest model without score
+            if f.startswith('_'):
                 best_file = f
     
     if best_file:
@@ -80,9 +112,34 @@ SOCKET = "wss://stream.binance.com:9443/ws/ethusdt@kline_1m"
 TRADE_SYMBOL = 'ETHUSDT'
 TRADE_QUANTITY = 0.05
 
-# Model parameters (MUST MATCH YOUR TRAINING)
-LOOKBACK_WINDOW_SIZE = 50  # From your training code
+# Model parameters (MUST MATCH YOUR TRAINING - from env.py line 58)
+LOOKBACK_WINDOW_SIZE = 50
 ACTION_SPACE = 3  # Hold, Buy, Sell
+NUM_FEATURES = 20  # Exactly 20 features from cryptoanalysis_data.csv
+
+# Les 20 features EXACTES de votre CSV (dans l'ordre)
+FEATURE_COLUMNS = [
+    'receive_count',
+    'sent_count',
+    'avg_fee',
+    'blocksize',
+    'btchashrate',
+    'OIL',
+    'ecr20_transfers',
+    'GOLD',
+    'searches',
+    'hashrate',
+    'marketcap',
+    'difficulty',
+    's&p500',
+    'transactionfee',
+    'transactions',
+    'tweet_count',
+    'unique_adresses',
+    'VIX',
+    'UVYX',
+    'Close'  # Ajouté à la fin dans reset() de env.py
+]
 
 # State management
 recent_candles = []
@@ -91,21 +148,27 @@ MAX_CANDLES = 200
 # Global model variable
 actor_model = None
 
+# Cache pour les données externes (mise à jour toutes les heures)
+external_data_cache = {
+    'last_update': 0,
+    'data': {}
+}
+
 def create_actor_model(input_shape, action_space, lr=0.00001):
     """
-    Recreate the Actor model architecture from your training code.
-    This MUST match exactly what you used during training.
+    Recrée EXACTEMENT l'architecture du modèle Actor.
+    Doit correspondre à Shared_Model dans models.py (lignes 79-102)
     """
     X_input = Input(input_shape)
     
-    # Shared CNN layers (from Shared_Model with model="CNN")
+    # Shared CNN layers (identique à models.py lignes 88-92)
     X = Conv1D(filters=64, kernel_size=6, padding="same", activation="tanh")(X_input)
     X = MaxPooling1D(pool_size=2)(X)
     X = Conv1D(filters=32, kernel_size=3, padding="same", activation="tanh")(X)
     X = MaxPooling1D(pool_size=2)(X)
     X = Flatten()(X)
     
-    # Actor layers
+    # Actor layers (identique à models.py lignes 105-108)
     A = Dense(512, activation="relu")(X)
     A = Dense(256, activation="relu")(A)
     A = Dense(64, activation="relu")(A)
@@ -137,28 +200,20 @@ def load_actor_model():
         
         print(f"✓ Found model: {actor_path}")
         
-        # Get number of features from a sample calculation
-        # Your training normalizes all features except Close and Date
-        # Typical features: open, high, low, close, volume + technical indicators
-        # From your code: df has multiple columns, Close is separate
-        # Let's assume ~20 features (adjust if you know exact number)
-        num_features = 20  # ADJUST THIS based on your actual feature count
-        
-        input_shape = (LOOKBACK_WINDOW_SIZE, num_features)
+        input_shape = (LOOKBACK_WINDOW_SIZE, NUM_FEATURES)
         print(f"Input shape: {input_shape}")
         
-        # Create model architecture
         print("Creating Actor model architecture...")
         actor_model = create_actor_model(input_shape, ACTION_SPACE)
         
         print("Model architecture created:")
         actor_model.summary()
         
-        # Load weights
         print(f"\nLoading weights from: {actor_path}")
         actor_model.load_weights(actor_path)
         
         print("✓ Model loaded successfully!")
+        print(f"✓ Using {NUM_FEATURES} features matching training data")
         return True
         
     except Exception as e:
@@ -180,67 +235,140 @@ def send_mail(content):
     except Exception as e:
         print(f"✗ Failed to send email: {e}")
 
-def normalize_data(data, df_min, df_max):
+def get_external_data():
     """
-    Normalize data the same way as in training.
+    Récupère les données externes (OIL, GOLD, S&P500, VIX, etc.)
+    Cache pendant 1 heure pour éviter trop de requêtes API
     """
-    return (data - df_min) / (df_max - df_min)
+    global external_data_cache
+    
+    current_time = time.time()
+    
+    # Si cache encore valide (moins d'1 heure)
+    if current_time - external_data_cache['last_update'] < 3600:
+        return external_data_cache['data']
+    
+    print("🌐 Fetching external market data...")
+    
+    try:
+        # PLACEHOLDER - Remplacez par vos vraies API calls
+        # Pour le moment, on utilise des valeurs par défaut
+        
+        external_data = {
+            'OIL': 75.0,           # Prix du pétrole
+            'GOLD': 2000.0,        # Prix de l'or
+            's&p500': 4500.0,      # S&P 500
+            'VIX': 15.0,           # Volatility Index
+            'UVYX': 10.0,          # ProShares Ultra VIX
+            'btchashrate': 400e18  # Bitcoin hashrate
+        }
+        
+        # TODO: Remplacer par de vraies API calls:
+        # - Oil: https://www.alphavantage.co/query?function=WTI...
+        # - Gold: https://www.alphavantage.co/query?function=XAU...
+        # - S&P500: https://www.alphavantage.co/query?function=SPY...
+        # - VIX: https://www.alphavantage.co/query?function=^VIX...
+        
+        external_data_cache['data'] = external_data
+        external_data_cache['last_update'] = current_time
+        
+        print(f"✓ External data updated: {external_data}")
+        return external_data
+        
+    except Exception as e:
+        print(f"⚠ Error fetching external data: {e}")
+        # Retourne les dernières données en cache ou des valeurs par défaut
+        if external_data_cache['data']:
+            return external_data_cache['data']
+        else:
+            return {
+                'OIL': 75.0,
+                'GOLD': 2000.0,
+                's&p500': 4500.0,
+                'VIX': 15.0,
+                'UVYX': 10.0,
+                'btchashrate': 400e18
+            }
 
 def prepare_state(candles_data):
     """
-    Prepare state exactly as done in training.
-    Must match the preprocessing in your training code.
+    Prépare l'état EXACTEMENT comme dans l'entraînement.
+    Utilise les 20 features EXACTES de cryptoanalysis_data.csv
     """
     if len(candles_data) < LOOKBACK_WINDOW_SIZE:
         return None
     
-    # Get the last LOOKBACK_WINDOW_SIZE candles
+    # Prend les dernières LOOKBACK_WINDOW_SIZE bougies
     recent = candles_data[-LOOKBACK_WINDOW_SIZE:]
     
-    # Convert to DataFrame (matching training format)
+    # Convertit en DataFrame
     df = pd.DataFrame(recent)
     
-    # Extract features
-    # IMPORTANT: Adjust this based on your actual features in cryptoanalysis_data.csv
-    # Your training code uses all columns except 'Close' and 'Date'
+    # Convertit en float
+    for col in ['open', 'high', 'low', 'close', 'volume']:
+        df[col] = df[col].astype(float)
+    
+    # Récupère les données externes
+    external_data = get_external_data()
+    
+    # Crée les features EXACTEMENT comme dans env.py reset() (lignes 270-290)
+    # L'ordre EST CRITIQUE!
     features_list = []
     
-    for _, row in df.iterrows():
-        # Basic OHLCV features
+    for idx, row in df.iterrows():
+        # DOIT correspondre EXACTEMENT à blockchain_data.append() dans env.py
         features = [
-            float(row['open']),
-            float(row['high']),
-            float(row['low']),
-            float(row['close']),
-            float(row['volume'])
+            float(row['close']),                    # Close (sera retiré pour normalisation mais ajouté à la fin)
+            external_data.get('receive_count', 1000),  # receive_count - À REMPLACER par vraie API
+            external_data.get('sent_count', 1000),     # sent_count
+            float(row['volume']) * 0.001,              # avg_fee (approximation)
+            1000000,                                    # blocksize - À REMPLACER
+            external_data.get('btchashrate', 400e18),  # btchashrate
+            external_data.get('OIL', 75.0),            # OIL
+            500,                                        # ecr20_transfers - À REMPLACER
+            external_data.get('GOLD', 2000.0),         # GOLD
+            100,                                        # searches (Google Trends) - À REMPLACER
+            300e12,                                     # hashrate - À REMPLACER
+            150e9,                                      # marketcap - À REMPLACER
+            5e12,                                       # difficulty - À REMPLACER
+            external_data.get('s&p500', 4500.0),       # s&p500
+            float(row['volume']) * 0.0001,             # transactionfee
+            1000,                                       # transactions - À REMPLACER
+            50,                                         # tweet_count - À REMPLACER
+            50000,                                      # unique_adresses - À REMPLACER
+            external_data.get('VIX', 15.0),            # VIX
+            external_data.get('UVYX', 10.0)            # UVYX
         ]
-        
-        # Add more features here if your training data has them
-        # Example: RSI, MACD, moving averages, etc.
-        # For now, we'll pad with zeros to match expected feature count
-        # ADJUST THIS based on your actual feature engineering
         
         features_list.append(features)
     
-    # Convert to numpy array
+    # Convertit en numpy array
     state = np.array(features_list)
     
-    # Normalize (same as training)
-    # In training: normalized_df = (df - df_min) / (df_max - df_min)
-    # For simplicity, we'll use min-max normalization on the current window
-    state_min = state.min()
-    state_max = state.max()
-    if state_max - state_min > 0:
-        state = (state - state_min) / (state_max - state_min)
+    # Vérifie la forme
+    if state.shape[1] != NUM_FEATURES:
+        print(f"⚠ WARNING: Feature mismatch! Expected {NUM_FEATURES}, got {state.shape[1]}")
+        return None
     
-    # Reshape for model: (1, lookback_window, features)
-    state = state.reshape(1, LOOKBACK_WINDOW_SIZE, -1)
+    # Normalisation IDENTIQUE à l'entraînement (main.py lignes 23-26)
+    if DF_MIN is not None and DF_MAX is not None:
+        # Utilise les paramètres d'entraînement
+        state = (state - DF_MIN) / (DF_MAX - DF_MIN)
+    else:
+        # Fallback: normalisation par fenêtre
+        state_min = state.min()
+        state_max = state.max()
+        if state_max - state_min > 0:
+            state = (state - state_min) / (state_max - state_min)
+    
+    # Reshape pour le modèle: (1, lookback_window, features)
+    state = state.reshape(1, LOOKBACK_WINDOW_SIZE, NUM_FEATURES)
     
     return state
 
 def get_model_action(state):
     """
-    Get trading action from the Actor model.
+    Obtient l'action du modèle Actor.
     Returns: 0 (Hold), 1 (Buy), 2 (Sell)
     """
     if actor_model is None or state is None:
@@ -248,13 +376,13 @@ def get_model_action(state):
         return 0
     
     try:
-        # Get prediction from actor model
+        # Prédiction du modèle
         prediction = actor_model.predict(state, verbose=0)
         
-        # Get the action with highest probability
+        # Action avec la plus haute probabilité
         action = np.argmax(prediction[0])
         
-        # Get confidence scores
+        # Scores de confiance
         confidence = prediction[0]
         
         print(f"\n🤖 Model Prediction:")
@@ -280,23 +408,23 @@ def append_list_as_row(file_name, list_of_elem):
 def order(side, quantity, symbol, order_type='MARKET'):
     """Place an order - currently simulated."""
     print(f"\n💰 ORDER SIMULATION: {side} {quantity} {symbol}")
-    print("   (Real trading disabled)")
+    print("   ⚠ REAL TRADING DISABLED FOR SAFETY")
     
-    # Log the simulated order
+    # Log l'ordre simulé
     timestamp = int(time.time() * 1000)
     order_data = [
-        f"sim_{timestamp}",  # id
-        symbol,              # symbol
-        0,                   # market_price (to be filled)
-        quantity,            # qty
-        timestamp,           # timestamp
-        side,                # side
-        0,                   # cum_market_price
-        0,                   # fee
-        0.075,              # fee_percent
-        0,                   # price_with_fee
-        '---',              # profits
-        '---'               # profits_percent
+        f"sim_{timestamp}",
+        symbol,
+        0,
+        quantity,
+        timestamp,
+        side,
+        0,
+        0,
+        0.075,
+        0,
+        '---',
+        '---'
     ]
     
     try:
@@ -312,7 +440,6 @@ def on_open(ws):
     print("\n" + "="*60)
     print("WEBSOCKET CONNECTED")
     print("="*60)
-    get_data_onStart()
     send_mail('PPO RL trading bot is online and monitoring.')
     print('✓ PPO RL bot is online')
 
@@ -330,7 +457,7 @@ def on_error(ws, error):
 
 def on_message(ws, message):
     """
-    Process incoming WebSocket messages and make trading decisions.
+    Traite les messages WebSocket et prend des décisions de trading.
     """
     global recent_candles
     
@@ -339,7 +466,7 @@ def on_message(ws, message):
         candle = json_message['k']
         is_candle_closed = candle['x']
         
-        # Store candle data
+        # Stocke les données de la bougie
         candle_data = {
             'open': candle['o'],
             'high': candle['h'],
@@ -349,52 +476,52 @@ def on_message(ws, message):
             'timestamp': candle['t']
         }
         
-        # Print live updates
+        # Affichage en temps réel
         print(f"\r💹 Live: Close={candle_data['close']} | "
               f"Vol={float(candle_data['volume']):.2f} | "
               f"Candles={len(recent_candles)}/{LOOKBACK_WINDOW_SIZE}", end='')
         
         if is_candle_closed:
-            print()  # New line
+            print()
             print("\n" + "-"*60)
             print(f"📊 CANDLE CLOSED at {candle_data['close']}")
             print("-"*60)
             
             recent_candles.append(candle_data)
             
-            # Keep only the last MAX_CANDLES
+            # Garde seulement les dernières MAX_CANDLES
             if len(recent_candles) > MAX_CANDLES:
                 recent_candles.pop(0)
             
-            # Wait until we have enough data
+            # Attend d'avoir assez de données
             if len(recent_candles) < LOOKBACK_WINDOW_SIZE:
                 print(f"⏳ Collecting data... ({len(recent_candles)}/{LOOKBACK_WINDOW_SIZE} candles)")
                 return
             
-            # Prepare state for model
+            # Prépare l'état pour le modèle
             state = prepare_state(recent_candles)
             
             if state is not None:
                 print(f"✓ State prepared: shape={state.shape}")
                 
-                # Get action from model
+                # Obtient l'action du modèle
                 action = get_model_action(state)
                 
-                # Read transaction history to get last position
+                # Lit l'historique des transactions
                 try:
                     df = pd.read_csv("../transaction_history.csv")
                     if len(df) > 0:
                         limited_data = df.tail(10).iloc[::-1]
                         last_side = limited_data['side'].iloc[0]
                     else:
-                        last_side = "SELL"  # Default to allow first buy
+                        last_side = "SELL"
                 except Exception as e:
                     print(f"⚠ Could not read transaction history: {e}")
                     last_side = "SELL"
                 
                 print(f"📍 Current Position: {last_side}")
                 
-                # Execute trades based on model action
+                # Exécute les trades selon l'action du modèle
                 if action == 2 and last_side == "BUY":  # SELL
                     print("\n🔴 EXECUTING: SELL")
                     order_succeeded = order('SELL', TRADE_QUANTITY, TRADE_SYMBOL)
@@ -427,8 +554,10 @@ def bot():
     print(f"WebSocket: {SOCKET}")
     print(f"Trade symbol: {TRADE_SYMBOL}")
     print(f"Lookback window: {LOOKBACK_WINDOW_SIZE}")
+    print(f"Number of features: {NUM_FEATURES}")
+    print(f"Features: {FEATURE_COLUMNS}")
     
-    # Load the model
+    # Charge le modèle
     model_loaded = load_actor_model()
     
     if not model_loaded:
@@ -446,7 +575,7 @@ def bot():
     print("CONNECTING TO BINANCE WEBSOCKET")
     print("="*60)
     
-    # Create and run WebSocket
+    # Crée et lance le WebSocket
     ws = websocket.WebSocketApp(
         SOCKET,
         on_open=on_open,

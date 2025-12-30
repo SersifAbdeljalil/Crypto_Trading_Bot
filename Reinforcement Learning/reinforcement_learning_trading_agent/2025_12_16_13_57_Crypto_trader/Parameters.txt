@@ -1,9 +1,0 @@
-Training start: 2025-12-16 13:57
-Initial balance: 1000
-Training episodes: 50
-Lookback window size: 50
-Learning rate: 1e-05
-Epochs: 10
-Batch size: 64
-Normalize value: 40000
-Model: CNN
