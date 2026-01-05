@@ -17,7 +17,6 @@ import emoji
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from pathlib import Path
 
 class CryptoNewsScraper:
     def __init__(self, webdriver_path: str = "/usr/local/bin/chromedriver"):
@@ -32,6 +31,9 @@ class CryptoNewsScraper:
             file_name (str): The name of the file to append to.
             list_of_elem (list): The list of elements to append.
         """
+        # Créer le dossier parent si nécessaire
+        Path(file_name).parent.mkdir(parents=True, exist_ok=True)
+        
         with open(file_name, 'a+', newline='', encoding='utf-8') as write_obj:
             csv_writer = writer(write_obj)
             csv_writer.writerow(list_of_elem)
@@ -90,17 +92,31 @@ class CryptoNewsScraper:
             time_limit: the max amount of time to scrape for news
         """
         print('scraper online:', news_type)
+        
+        # FIX: Utiliser des chemins relatifs au projet au lieu de chemins absolus Linux
+        project_root = Path(__file__).resolve().parents[2]
+        output_dir = project_root / 'app' / 'output_data'
+        
         if news_type == 'top':
             url = 'https://cryptonews.net/en/news/top/'
-            csv_file = '/app/output_data/topNews.csv'
+            csv_file = str(output_dir / 'topNews.csv')
         elif news_type == 'latest':
             url = 'https://cryptonews.net/en/'
-            csv_file = '/app/output_data/allNews.csv'
+            csv_file = str(output_dir / 'allNews.csv')
         else:
             raise ValueError("Invalid type specified. Must be 'top' or 'latest'")
         
         if csv_file_path is not None:
             csv_file = csv_file_path
+        
+        # Créer le dossier output_data s'il n'existe pas
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Créer le fichier CSV avec en-têtes s'il n'existe pas
+        if not Path(csv_file).exists():
+            df_empty = pd.DataFrame(columns=['title', 'link', 'date', 'article'])
+            df_empty.to_csv(csv_file, index=False, encoding='utf-8')
+            print(f'Created CSV file: {csv_file}')
 
         driver = self.initialize_driver()
         driver.get(url)

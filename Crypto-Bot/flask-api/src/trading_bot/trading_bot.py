@@ -1,10 +1,11 @@
 """
 Trading bot with PPO Actor-Critic RL model integration
-VERSION CORRIGÉE - Utilise les 20 features exactes de cryptoanalysis_data.csv
+VERSION CORRIGÉE - Corrections des chemins et synchronisation des features
 """
 import websocket
 import json
 import os
+from pathlib import Path
 from dotenv import dotenv_values
 from csv import writer
 import pandas as pd
@@ -40,14 +41,29 @@ else:
 # Model configuration
 MODEL_PATH = r"C:\BC\Reinforcement_Learning\reinforcement_learning_trading_agent\2025_12_30_12_22_Crypto_trader"
 
-# Training data normalization parameters (loaded from cryptoanalysis_data.csv)
-# Ces valeurs DOIVENT correspondre à celles utilisées pendant l'entraînement
+# Output data paths - CORRECTION DES CHEMINS
+OUTPUT_DIR = Path(r"C:\BC\Crypto-Bot\flask-api\app\output_data")
+TRANSACTION_HISTORY_PATH = OUTPUT_DIR / "transaction_history.csv"
+
+# Créer le dossier si nécessaire
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+# Initialiser le fichier transaction_history.csv s'il n'existe pas
+if not TRANSACTION_HISTORY_PATH.exists():
+    df = pd.DataFrame(columns=[
+        'order_id', 'symbol', 'order_status', 'quantity', 
+        'timestamp', 'side', 'price', 'total', 'fee', 
+        'net_profit', 'buy_price', 'sell_price'
+    ])
+    df.to_csv(TRANSACTION_HISTORY_PATH, index=False)
+    print(f"✓ Created transaction history file: {TRANSACTION_HISTORY_PATH}")
+
+# Training data normalization parameters
 TRAINING_CSV_PATH = r"C:\BC\Reinforcement_Learning\reinforcement_learning_trading_agent\cryptoanalysis_data.csv"
 
 def load_normalization_params():
     """
     Charge les paramètres de normalisation depuis le CSV d'entraînement.
-    CRITIQUE: La normalisation doit être IDENTIQUE à l'entraînement!
     """
     try:
         df = pd.read_csv(TRAINING_CSV_PATH)
@@ -56,7 +72,7 @@ def load_normalization_params():
         # Retire Close et Date comme dans main.py
         df_for_norm = df.drop(['Close', 'Date'], axis=1)
         
-        # Calcule min/max comme dans main.py (lignes 23-26)
+        # Calcule min/max comme dans main.py
         column_maxes = df_for_norm.max()
         df_max = column_maxes.max()
         column_mins = df_for_norm.min()
@@ -69,12 +85,11 @@ def load_normalization_params():
         return df_min, df_max
     except Exception as e:
         print(f"⚠ Could not load normalization params: {e}")
-        print("   Using default normalization per-window")
         return None, None
 
 DF_MIN, DF_MAX = load_normalization_params()
 
-# Find the best model (highest reward)
+# Find the best model
 def find_best_model(path):
     """Find the model with highest reward score"""
     files = os.listdir(path)
@@ -83,22 +98,27 @@ def find_best_model(path):
     if not actor_files:
         return None, None
     
+    # Cherche le modèle avec le meilleur score
     best_score = -float('inf')
     best_file = None
     
     for f in actor_files:
         try:
-            score = float(f.split('_')[0])
+            # Extrait le score du nom de fichier
+            score_str = f.split('_')[0]
+            score = float(score_str)
             if score > best_score:
                 best_score = score
                 best_file = f
         except:
+            # Si pas de score, utilise le fichier par défaut
             if f.startswith('_'):
                 best_file = f
     
     if best_file:
         actor_file = best_file
         critic_file = best_file.replace('_Actor.weights.h5', '_Critic.weights.h5')
+        print(f"✓ Best model found with score: {best_score}")
         return actor_file, critic_file
     
     return None, None
@@ -112,12 +132,12 @@ SOCKET = "wss://stream.binance.com:9443/ws/ethusdt@kline_1m"
 TRADE_SYMBOL = 'ETHUSDT'
 TRADE_QUANTITY = 0.05
 
-# Model parameters (MUST MATCH YOUR TRAINING - from env.py line 58)
+# Model parameters
 LOOKBACK_WINDOW_SIZE = 50
 ACTION_SPACE = 3  # Hold, Buy, Sell
-NUM_FEATURES = 20  # Exactly 20 features from cryptoanalysis_data.csv
+NUM_FEATURES = 20  # 20 features from cryptoanalysis_data.csv
 
-# Les 20 features EXACTES de votre CSV (dans l'ordre)
+# Les 20 features EXACTES (vérifiez l'ordre dans votre CSV d'entraînement!)
 FEATURE_COLUMNS = [
     'receive_count',
     'sent_count',
@@ -138,7 +158,7 @@ FEATURE_COLUMNS = [
     'unique_adresses',
     'VIX',
     'UVYX',
-    'Close'  # Ajouté à la fin dans reset() de env.py
+    'Close'
 ]
 
 # State management
@@ -148,27 +168,29 @@ MAX_CANDLES = 200
 # Global model variable
 actor_model = None
 
-# Cache pour les données externes (mise à jour toutes les heures)
+# Cache pour les données externes
 external_data_cache = {
     'last_update': 0,
     'data': {}
 }
 
+# Mode de trading
+SIMULATION_MODE = True  # Mettre à False pour activer le trading réel
+
 def create_actor_model(input_shape, action_space, lr=0.00001):
     """
-    Recrée EXACTEMENT l'architecture du modèle Actor.
-    Doit correspondre à Shared_Model dans models.py (lignes 79-102)
+    Recrée l'architecture du modèle Actor.
     """
     X_input = Input(input_shape)
     
-    # Shared CNN layers (identique à models.py lignes 88-92)
+    # Shared CNN layers
     X = Conv1D(filters=64, kernel_size=6, padding="same", activation="tanh")(X_input)
     X = MaxPooling1D(pool_size=2)(X)
     X = Conv1D(filters=32, kernel_size=3, padding="same", activation="tanh")(X)
     X = MaxPooling1D(pool_size=2)(X)
     X = Flatten()(X)
     
-    # Actor layers (identique à models.py lignes 105-108)
+    # Actor layers
     A = Dense(512, activation="relu")(X)
     A = Dense(256, activation="relu")(A)
     A = Dense(64, activation="relu")(A)
@@ -206,14 +228,10 @@ def load_actor_model():
         print("Creating Actor model architecture...")
         actor_model = create_actor_model(input_shape, ACTION_SPACE)
         
-        print("Model architecture created:")
-        actor_model.summary()
-        
-        print(f"\nLoading weights from: {actor_path}")
+        print("Loading weights...")
         actor_model.load_weights(actor_path)
         
         print("✓ Model loaded successfully!")
-        print(f"✓ Using {NUM_FEATURES} features matching training data")
         return True
         
     except Exception as e:
@@ -237,14 +255,13 @@ def send_mail(content):
 
 def get_external_data():
     """
-    Récupère les données externes (OIL, GOLD, S&P500, VIX, etc.)
-    Cache pendant 1 heure pour éviter trop de requêtes API
+    Récupère les données externes avec cache d'1 heure.
     """
     global external_data_cache
     
     current_time = time.time()
     
-    # Si cache encore valide (moins d'1 heure)
+    # Si cache encore valide
     if current_time - external_data_cache['last_update'] < 3600:
         return external_data_cache['data']
     
@@ -252,32 +269,23 @@ def get_external_data():
     
     try:
         # PLACEHOLDER - Remplacez par vos vraies API calls
-        # Pour le moment, on utilise des valeurs par défaut
-        
         external_data = {
-            'OIL': 75.0,           # Prix du pétrole
-            'GOLD': 2000.0,        # Prix de l'or
-            's&p500': 4500.0,      # S&P 500
-            'VIX': 15.0,           # Volatility Index
-            'UVYX': 10.0,          # ProShares Ultra VIX
-            'btchashrate': 400e18  # Bitcoin hashrate
+            'OIL': 75.0,
+            'GOLD': 2000.0,
+            's&p500': 4500.0,
+            'VIX': 15.0,
+            'UVYX': 10.0,
+            'btchashrate': 400e18
         }
-        
-        # TODO: Remplacer par de vraies API calls:
-        # - Oil: https://www.alphavantage.co/query?function=WTI...
-        # - Gold: https://www.alphavantage.co/query?function=XAU...
-        # - S&P500: https://www.alphavantage.co/query?function=SPY...
-        # - VIX: https://www.alphavantage.co/query?function=^VIX...
         
         external_data_cache['data'] = external_data
         external_data_cache['last_update'] = current_time
         
-        print(f"✓ External data updated: {external_data}")
+        print(f"✓ External data updated")
         return external_data
         
     except Exception as e:
         print(f"⚠ Error fetching external data: {e}")
-        # Retourne les dernières données en cache ou des valeurs par défaut
         if external_data_cache['data']:
             return external_data_cache['data']
         else:
@@ -292,163 +300,162 @@ def get_external_data():
 
 def prepare_state(candles_data):
     """
-    Prépare l'état EXACTEMENT comme dans l'entraînement.
-    Utilise les 20 features EXACTES de cryptoanalysis_data.csv
+    Prépare l'état pour le modèle avec les 20 features.
+    CRITIQUE: L'ordre ET les valeurs doivent correspondre à l'entraînement!
     """
     if len(candles_data) < LOOKBACK_WINDOW_SIZE:
         return None
     
-    # Prend les dernières LOOKBACK_WINDOW_SIZE bougies
     recent = candles_data[-LOOKBACK_WINDOW_SIZE:]
-    
-    # Convertit en DataFrame
     df = pd.DataFrame(recent)
     
     # Convertit en float
     for col in ['open', 'high', 'low', 'close', 'volume']:
         df[col] = df[col].astype(float)
     
-    # Récupère les données externes
     external_data = get_external_data()
     
-    # Crée les features EXACTEMENT comme dans env.py reset() (lignes 270-290)
-    # L'ordre EST CRITIQUE!
+    # Crée les features dans l'ORDRE EXACT du CSV d'entraînement
     features_list = []
     
     for idx, row in df.iterrows():
-        # DOIT correspondre EXACTEMENT à blockchain_data.append() dans env.py
+        # ⚠️ ATTENTION: Cet ordre DOIT correspondre EXACTEMENT à votre CSV
+        # Vérifiez les colonnes de cryptoanalysis_data.csv!
         features = [
-            float(row['close']),                    # Close (sera retiré pour normalisation mais ajouté à la fin)
-            external_data.get('receive_count', 1000),  # receive_count - À REMPLACER par vraie API
-            external_data.get('sent_count', 1000),     # sent_count
-            float(row['volume']) * 0.001,              # avg_fee (approximation)
-            1000000,                                    # blocksize - À REMPLACER
-            external_data.get('btchashrate', 400e18),  # btchashrate
-            external_data.get('OIL', 75.0),            # OIL
-            500,                                        # ecr20_transfers - À REMPLACER
-            external_data.get('GOLD', 2000.0),         # GOLD
-            100,                                        # searches (Google Trends) - À REMPLACER
-            300e12,                                     # hashrate - À REMPLACER
-            150e9,                                      # marketcap - À REMPLACER
-            5e12,                                       # difficulty - À REMPLACER
-            external_data.get('s&p500', 4500.0),       # s&p500
-            float(row['volume']) * 0.0001,             # transactionfee
-            1000,                                       # transactions - À REMPLACER
-            50,                                         # tweet_count - À REMPLACER
-            50000,                                      # unique_adresses - À REMPLACER
-            external_data.get('VIX', 15.0),            # VIX
-            external_data.get('UVYX', 10.0)            # UVYX
+            external_data.get('receive_count', 1000),      # 0: receive_count
+            external_data.get('sent_count', 1000),         # 1: sent_count
+            float(row['volume']) * 0.001,                   # 2: avg_fee
+            1000000,                                        # 3: blocksize
+            external_data.get('btchashrate', 400e18),      # 4: btchashrate
+            external_data.get('OIL', 75.0),                # 5: OIL
+            500,                                            # 6: ecr20_transfers
+            external_data.get('GOLD', 2000.0),             # 7: GOLD
+            100,                                            # 8: searches
+            300e12,                                         # 9: hashrate
+            150e9,                                          # 10: marketcap
+            5e12,                                           # 11: difficulty
+            external_data.get('s&p500', 4500.0),           # 12: s&p500
+            float(row['volume']) * 0.0001,                 # 13: transactionfee
+            1000,                                           # 14: transactions
+            50,                                             # 15: tweet_count
+            50000,                                          # 16: unique_adresses
+            external_data.get('VIX', 15.0),                # 17: VIX
+            external_data.get('UVYX', 10.0),               # 18: UVYX
+            float(row['close'])                             # 19: Close
         ]
         
         features_list.append(features)
     
-    # Convertit en numpy array
     state = np.array(features_list)
     
-    # Vérifie la forme
     if state.shape[1] != NUM_FEATURES:
         print(f"⚠ WARNING: Feature mismatch! Expected {NUM_FEATURES}, got {state.shape[1]}")
         return None
     
-    # Normalisation IDENTIQUE à l'entraînement (main.py lignes 23-26)
+    # Normalisation avec les paramètres d'entraînement
     if DF_MIN is not None and DF_MAX is not None:
-        # Utilise les paramètres d'entraînement
         state = (state - DF_MIN) / (DF_MAX - DF_MIN)
     else:
-        # Fallback: normalisation par fenêtre
+        # Fallback
         state_min = state.min()
         state_max = state.max()
         if state_max - state_min > 0:
             state = (state - state_min) / (state_max - state_min)
     
-    # Reshape pour le modèle: (1, lookback_window, features)
+    # Reshape: (1, lookback_window, features)
     state = state.reshape(1, LOOKBACK_WINDOW_SIZE, NUM_FEATURES)
     
     return state
 
 def get_model_action(state):
     """
-    Obtient l'action du modèle Actor.
-    Returns: 0 (Hold), 1 (Buy), 2 (Sell)
+    Obtient l'action du modèle avec seuil de confiance.
     """
     if actor_model is None or state is None:
-        print("⚠ Model not loaded or state invalid - defaulting to HOLD")
         return 0
     
     try:
-        # Prédiction du modèle
         prediction = actor_model.predict(state, verbose=0)
-        
-        # Action avec la plus haute probabilité
-        action = np.argmax(prediction[0])
-        
-        # Scores de confiance
         confidence = prediction[0]
+        action = np.argmax(confidence)
         
         print(f"\n🤖 Model Prediction:")
         print(f"   Hold:  {confidence[0]:.2%}")
         print(f"   Buy:   {confidence[1]:.2%}")
         print(f"   Sell:  {confidence[2]:.2%}")
-        print(f"   → Action: {['HOLD', 'BUY', 'SELL'][action]}")
+        
+        # Seuil de confiance minimum (ajustez selon vos besoins)
+        min_confidence = 0.4
+        if confidence[action] < min_confidence:
+            print(f"   ⚠️ Confidence too low ({confidence[action]:.2%}), defaulting to HOLD")
+            action = 0
+        else:
+            print(f"   → Action: {['HOLD', 'BUY', 'SELL'][action]} (confidence: {confidence[action]:.2%})")
         
         return action
         
     except Exception as e:
         print(f"✗ Error getting model prediction: {e}")
-        import traceback
-        traceback.print_exc()
         return 0
 
 def append_list_as_row(file_name, list_of_elem):
     """Append a list as a row to a CSV file."""
-    with open(file_name, 'a+', newline='') as write_obj:
+    with open(file_name, 'a+', newline='', encoding='utf-8') as write_obj:
         csv_writer = writer(write_obj)
         csv_writer.writerow(list_of_elem)
 
 def order(side, quantity, symbol, order_type='MARKET'):
-    """Place an order - currently simulated."""
-    print(f"\n💰 ORDER SIMULATION: {side} {quantity} {symbol}")
-    print("   ⚠ REAL TRADING DISABLED FOR SAFETY")
-    
-    # Log l'ordre simulé
+    """Place an order - simulation ou réel selon SIMULATION_MODE."""
     timestamp = int(time.time() * 1000)
-    order_data = [
-        f"sim_{timestamp}",
-        symbol,
-        0,
-        quantity,
-        timestamp,
-        side,
-        0,
-        0,
-        0.075,
-        0,
-        '---',
-        '---'
-    ]
     
-    try:
-        append_list_as_row("../transaction_history.csv", order_data)
-        print("   ✓ Order logged to transaction_history.csv")
-    except Exception as e:
-        print(f"   ✗ Failed to log order: {e}")
+    if SIMULATION_MODE:
+        print(f"\n💰 ORDER SIMULATION: {side} {quantity} {symbol}")
+        
+        order_data = [
+            f"sim_{timestamp}",
+            symbol,
+            0,
+            quantity,
+            timestamp,
+            side,
+            0,
+            0,
+            0.075,
+            0,
+            '---',
+            '---'
+        ]
+        
+        try:
+            append_list_as_row(TRANSACTION_HISTORY_PATH, order_data)
+            print(f"   ✓ Order logged to {TRANSACTION_HISTORY_PATH}")
+        except Exception as e:
+            print(f"   ✗ Failed to log order: {e}")
+        
+        return True
     
-    return True
+    else:
+        # TRADING RÉEL - Utiliser l'API Binance
+        print(f"\n💰 REAL ORDER: {side} {quantity} {symbol}")
+        print("   ⚠️ REAL TRADING NOT IMPLEMENTED YET")
+        # TODO: Implémenter l'API Binance
+        return False
 
 def on_open(ws):
-    """Called when the WebSocket is opened."""
+    """Called when WebSocket is opened."""
     print("\n" + "="*60)
     print("WEBSOCKET CONNECTED")
     print("="*60)
-    send_mail('PPO RL trading bot is online and monitoring.')
-    print('✓ PPO RL bot is online')
+    mode = "SIMULATION" if SIMULATION_MODE else "LIVE TRADING"
+    send_mail(f'PPO RL trading bot is online ({mode})')
+    print(f'✓ PPO RL bot is online - Mode: {mode}')
 
 def on_close(ws, close_status_code, close_msg):
-    """Called when the WebSocket is closed."""
+    """Called when WebSocket is closed."""
     print("\n" + "="*60)
     print("WEBSOCKET CLOSED")
     print("="*60)
-    send_mail('Server closed. PPO RL bot stopped.')
+    send_mail('PPO RL bot stopped.')
     print(f'✗ Connection closed: {close_status_code} - {close_msg}')
 
 def on_error(ws, error):
@@ -466,7 +473,6 @@ def on_message(ws, message):
         candle = json_message['k']
         is_candle_closed = candle['x']
         
-        # Stocke les données de la bougie
         candle_data = {
             'open': candle['o'],
             'high': candle['h'],
@@ -489,16 +495,14 @@ def on_message(ws, message):
             
             recent_candles.append(candle_data)
             
-            # Garde seulement les dernières MAX_CANDLES
             if len(recent_candles) > MAX_CANDLES:
                 recent_candles.pop(0)
             
-            # Attend d'avoir assez de données
             if len(recent_candles) < LOOKBACK_WINDOW_SIZE:
                 print(f"⏳ Collecting data... ({len(recent_candles)}/{LOOKBACK_WINDOW_SIZE} candles)")
                 return
             
-            # Prépare l'état pour le modèle
+            # Prépare l'état
             state = prepare_state(recent_candles)
             
             if state is not None:
@@ -507,12 +511,11 @@ def on_message(ws, message):
                 # Obtient l'action du modèle
                 action = get_model_action(state)
                 
-                # Lit l'historique des transactions
+                # Lit la dernière position
                 try:
-                    df = pd.read_csv("../transaction_history.csv")
+                    df = pd.read_csv(TRANSACTION_HISTORY_PATH)
                     if len(df) > 0:
-                        limited_data = df.tail(10).iloc[::-1]
-                        last_side = limited_data['side'].iloc[0]
+                        last_side = df.iloc[-1]['side']
                     else:
                         last_side = "SELL"
                 except Exception as e:
@@ -521,7 +524,7 @@ def on_message(ws, message):
                 
                 print(f"📍 Current Position: {last_side}")
                 
-                # Exécute les trades selon l'action du modèle
+                # Exécute les trades
                 if action == 2 and last_side == "BUY":  # SELL
                     print("\n🔴 EXECUTING: SELL")
                     order_succeeded = order('SELL', TRADE_QUANTITY, TRADE_SYMBOL)
@@ -555,27 +558,32 @@ def bot():
     print(f"Trade symbol: {TRADE_SYMBOL}")
     print(f"Lookback window: {LOOKBACK_WINDOW_SIZE}")
     print(f"Number of features: {NUM_FEATURES}")
-    print(f"Features: {FEATURE_COLUMNS}")
+    print(f"Transaction history: {TRANSACTION_HISTORY_PATH}")
+    print(f"Mode: {'SIMULATION' if SIMULATION_MODE else 'LIVE TRADING'}")
+    
+    # ⚠️ AVERTISSEMENT SUR LES PERFORMANCES
+    print("\n" + "⚠️ "*30)
+    print("WARNING: Your model has NEGATIVE reward (-215.69)")
+    print("This means the model performed WORSE than random!")
+    print("STRONGLY RECOMMEND:")
+    print("1. Train longer (more episodes)")
+    print("2. Adjust hyperparameters")
+    print("3. Verify feature engineering")
+    print("4. Test in simulation before live trading")
+    print("⚠️ "*30 + "\n")
     
     # Charge le modèle
     model_loaded = load_actor_model()
     
     if not model_loaded:
-        print("\n⚠ WARNING: Model not loaded!")
-        print("Please check:")
-        print("1. Model path is correct")
-        print("2. Model files exist")
-        print("3. Input shape matches your training data")
-        response = input("\nContinue in monitoring mode? (y/n): ")
-        if response.lower() != 'y':
-            print("Exiting...")
-            return
+        print("\n✗ Model loading failed!")
+        return
     
     print("\n" + "="*60)
     print("CONNECTING TO BINANCE WEBSOCKET")
     print("="*60)
     
-    # Crée et lance le WebSocket
+    # Crée le WebSocket
     ws = websocket.WebSocketApp(
         SOCKET,
         on_open=on_open,

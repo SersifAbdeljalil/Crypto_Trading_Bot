@@ -72,7 +72,17 @@ class CustomAgent:
             train_episodes (int): Number of training episodes.
         '''
         self.replay_count = 0
-        self.writer = SummaryWriter('runs/' + self.log_name)
+        
+        # MODIFICATION ICI - Créer le chemin complet
+        log_dir = os.path.join('runs', self.log_name)
+        self.writer = SummaryWriter(log_dir)
+        
+        # AJOUT - Afficher le chemin pour l'utilisateur
+        print(f"\n📊 TensorBoard Configuration:")
+        print(f"   Log directory: {log_dir}")
+        print(f"   To view training progress, open a new terminal and run:")
+        print(f"   tensorboard --logdir=runs")
+        print(f"   Then open: http://localhost:6006\n")
 
         # Create folder to save models
         if not os.path.exists(self.log_name):
