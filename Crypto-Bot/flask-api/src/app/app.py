@@ -1,5 +1,5 @@
 """
-Flask app COMPLET pour le trading agent
+Flask app COMPLET pour le trading agent - VERSION CHEMINS CORRIGÉS
 Backend avec tous les endpoints + WebSocket + Indicateurs techniques
 """
 from pathlib import Path
@@ -21,31 +21,65 @@ import threading
 import time
 
 # ----------------------------
+# CHEMINS - CONFIGURATION DYNAMIQUE
+# ----------------------------
+# Chemin du fichier actuel
+CURRENT_FILE = Path(__file__).resolve()
+
+# Racine du projet (C:\BC\Crypto-Bot)
+PROJECT_ROOT = CURRENT_FILE.parents[3]  # Ajuster selon votre structure
+
+# Dossier output_data (C:\BC\Crypto-Bot\output_data)
+OUTPUT_DATA_DIR = PROJECT_ROOT / "output_data"
+
+# Alternative: Si les données sont dans flask-api/app/output_data
+# OUTPUT_DATA_DIR = CURRENT_FILE.parent / "output_data"
+
+# Créer le dossier s'il n'existe pas
+OUTPUT_DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+print(f"📁 Output data directory: {OUTPUT_DATA_DIR}")
+print(f"   Exists: {OUTPUT_DATA_DIR.exists()}")
+
+# ----------------------------
 # Load environment variables
 # ----------------------------
-dotenv_path = Path(__file__).resolve().parents[2] / ".env"
-load_dotenv(dotenv_path=dotenv_path)
+dotenv_path = PROJECT_ROOT / ".env"
+if not dotenv_path.exists():
+    dotenv_path = CURRENT_FILE.parents[2] / ".env"
+
+print(f"📄 .env path: {dotenv_path}")
+if dotenv_path.exists():
+    print(f"✓ .env file found")
+    load_dotenv(dotenv_path=dotenv_path)
+else:
+    print(f"⚠ .env file not found")
 
 # ----------------------------
 # Add project root to sys.path
 # ----------------------------
-project_root = Path(__file__).resolve().parents[2]
-sys.path.append(str(project_root / 'src'))
+sys.path.append(str(PROJECT_ROOT / 'src'))
+sys.path.append(str(PROJECT_ROOT / 'flask-api' / 'src'))
 
 # ----------------------------
 # Imports
 # ----------------------------
-from data_handler.crypto_news_scraper import CryptoNewsScraper
-# On importe NOT trading_bot.bot pour éviter conflit
-# from trading_bot.trading_bot import bot
-import configs.config
+try:
+    from data_handler.crypto_news_scraper import CryptoNewsScraper
+except ImportError:
+    print("⚠️ Could not import CryptoNewsScraper")
+    CryptoNewsScraper = None
+
+try:
+    import configs.config
+except ImportError:
+    print("⚠️ Could not import config")
 
 # Import du module d'indicateurs techniques
-sys.path.append(str(project_root / 'src' / 'data_handler'))
 try:
     from technical_indicators import TechnicalIndicators, fetch_binance_klines
 except ImportError:
-    print("⚠️ technical_indicators.py not found. Creating placeholder...")
+    print("⚠️ technical_indicators.py not found")
     TechnicalIndicators = None
     fetch_binance_klines = None
 
@@ -61,7 +95,7 @@ except:
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "default_secret_key")
 api = Api(app)
-CORS(app)  # Enable CORS
+CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 # ----------------------------
@@ -91,6 +125,7 @@ def home():
     return jsonify({
         "status": "online",
         "message": "Trading Bot Flask API v2.0",
+        "output_dir": str(OUTPUT_DATA_DIR),
         "endpoints": {
             "bot_status": "/bot_status",
             "bot_control": "/bot_control (POST)",
@@ -109,42 +144,39 @@ def home():
 class BotStatus(Resource):
     def get(self):
         """Retourne l'état actuel du bot"""
-        return jsonify(bot_status)
+        return bot_status
 
 class BotControl(Resource):
     def post(self):
         """Démarre ou arrête le bot"""
         data = request.get_json()
-        action = data.get('action')  # 'start' ou 'stop'
+        action = data.get('action')
         
         if action == 'start':
             bot_status['running'] = True
             bot_status['last_update'] = datetime.now().isoformat()
             
-            # Démarrer le bot dans un thread séparé
-            # threading.Thread(target=run_trading_bot, daemon=True).start()
-            
-            return jsonify({
+            return {
                 "success": True,
                 "message": "Bot started successfully",
                 "status": bot_status
-            })
+            }
             
         elif action == 'stop':
             bot_status['running'] = False
             bot_status['last_update'] = datetime.now().isoformat()
             
-            return jsonify({
+            return {
                 "success": True,
                 "message": "Bot stopped successfully",
                 "status": bot_status
-            })
+            }
         
         else:
-            return jsonify({
+            return {
                 "success": False,
                 "message": "Invalid action. Use 'start' or 'stop'"
-            }), 400
+            }, 400
 
 api.add_resource(BotStatus, "/bot_status")
 api.add_resource(BotControl, "/bot_control")
@@ -156,58 +188,55 @@ class TechnicalIndicatorsAPI(Resource):
     def get(self):
         """Retourne tous les indicateurs techniques"""
         if not tech_indicators:
-            return jsonify({
+            return {
                 "error": "Technical indicators module not available"
-            }), 503
+            }, 503
         
         try:
-            # Mettre à jour avec les dernières données
             candles = fetch_binance_klines(symbol="ETHUSDT", interval="1m", limit=100)
             
             if candles:
-                # Vider et remplir avec les nouvelles données
                 tech_indicators.candles.clear()
                 for candle in candles:
                     tech_indicators.add_candle(candle)
             
-            # Calculer les indicateurs
             indicators = tech_indicators.get_all_indicators()
             
-            return jsonify({
+            return {
                 "success": True,
                 "timestamp": datetime.now().isoformat(),
                 "symbol": "ETHUSDT",
                 "indicators": indicators
-            })
+            }
             
         except Exception as e:
-            return jsonify({
+            return {
                 "success": False,
                 "error": str(e)
-            }), 500
+            }, 500
 
 class MarketSentiment(Resource):
     def get(self):
         """Retourne le sentiment du marché"""
         if not tech_indicators:
-            return jsonify({
+            return {
                 "error": "Technical indicators module not available"
-            }), 503
+            }, 503
         
         try:
             sentiment = tech_indicators.get_market_sentiment()
             
-            return jsonify({
+            return {
                 "success": True,
                 "timestamp": datetime.now().isoformat(),
                 "sentiment": sentiment
-            })
+            }
             
         except Exception as e:
-            return jsonify({
+            return {
                 "success": False,
                 "error": str(e)
-            }), 500
+            }, 500
 
 api.add_resource(TechnicalIndicatorsAPI, "/technical_indicators")
 api.add_resource(MarketSentiment, "/market_sentiment")
@@ -218,10 +247,7 @@ api.add_resource(MarketSentiment, "/market_sentiment")
 class ModelPrediction(Resource):
     def get(self):
         """Retourne la dernière prédiction du modèle"""
-        # TODO: Intégrer avec le vrai modèle
-        # Pour l'instant, données mockées
-        
-        return jsonify({
+        return {
             "success": True,
             "timestamp": datetime.now().isoformat(),
             "prediction": {
@@ -231,22 +257,42 @@ class ModelPrediction(Resource):
             },
             "action": bot_status['last_action'],
             "confidence": bot_status['confidence']
-        })
+        }
 
 api.add_resource(ModelPrediction, "/model_prediction")
 
 # ----------------------------
-# Statistics
+# Statistics - CHEMINS CORRIGÉS
 # ----------------------------
 class BotStatistics(Resource):
     def get(self):
         """Retourne les statistiques du bot"""
         try:
-            # Lire l'historique des transactions
-            df = pd.read_csv("app/output_data/transaction_history.csv")
+            # ✅ UTILISE LE CHEMIN DYNAMIQUE
+            csv_path = OUTPUT_DATA_DIR / "transaction_history.csv"
+            
+            # Vérifier que le fichier existe
+            if not csv_path.exists():
+                print(f"⚠️ File not found: {csv_path}")
+                return {
+                    "success": True,
+                    "statistics": {
+                        "net_profit": 0.0,
+                        "win_rate": 0.0,
+                        "total_trades": 0,
+                        "winning_trades": 0,
+                        "losing_trades": 0,
+                        "average_profit": 0.0,
+                        "average_loss": 0.0,
+                        "profit_factor": 0.0
+                    },
+                    "note": "No transaction history file found"
+                }
+            
+            df = pd.read_csv(csv_path)
             
             if len(df) == 0:
-                return jsonify({
+                return {
                     "success": True,
                     "statistics": {
                         "net_profit": 0.0,
@@ -258,15 +304,13 @@ class BotStatistics(Resource):
                         "average_loss": 0.0,
                         "profit_factor": 0.0
                     }
-                })
+                }
             
-            # Calculer les statistiques
             sells = df[df['side'] == 'SELL']
             
             if len(sells) > 0:
                 total_trades = len(sells)
                 
-                # Profits
                 profits = []
                 for idx, row in sells.iterrows():
                     if row['profits'] != '---' and pd.notna(row['profits']):
@@ -290,13 +334,12 @@ class BotStatistics(Resource):
                     
                     profit_factor = abs(sum(winning_profits) / sum(losing_profits)) if losing_profits else 0
                     
-                    # Mettre à jour le statut global
                     bot_status['net_profit'] = net_profit
                     bot_status['win_rate'] = win_rate
                     bot_status['total_trades'] = total_trades
                     bot_status['winning_trades'] = winning_trades
                     
-                    return jsonify({
+                    return {
                         "success": True,
                         "statistics": {
                             "net_profit": round(net_profit, 2),
@@ -308,9 +351,9 @@ class BotStatistics(Resource):
                             "average_loss": round(avg_loss, 2),
                             "profit_factor": round(profit_factor, 2)
                         }
-                    })
+                    }
             
-            return jsonify({
+            return {
                 "success": True,
                 "statistics": {
                     "net_profit": 0.0,
@@ -322,45 +365,58 @@ class BotStatistics(Resource):
                     "average_loss": 0.0,
                     "profit_factor": 0.0
                 }
-            })
+            }
             
         except Exception as e:
-            return jsonify({
+            print(f"❌ Error in BotStatistics: {e}")
+            import traceback
+            traceback.print_exc()
+            return {
                 "success": False,
                 "error": str(e)
-            }), 500
+            }, 500
 
 api.add_resource(BotStatistics, "/statistics")
 
 # ----------------------------
-# Transactions History (existing)
+# Transactions History - CHEMINS CORRIGÉS
 # ----------------------------
 class AllTransactionHistory(Resource):
     def get(self, limit):
         try:
-            df = pd.read_csv("app/output_data/transaction_history.csv")
+            # ✅ UTILISE LE CHEMIN DYNAMIQUE
+            csv_path = OUTPUT_DATA_DIR / "transaction_history.csv"
+            
+            if not csv_path.exists():
+                return {"error": f"File not found: {csv_path}"}, 404
+            
+            df = pd.read_csv(csv_path)
             limited_data = df.tail(limit).iloc[::-1]
-            return jsonify(limited_data.to_dict(orient="records"))
+            return limited_data.to_dict(orient="records")
         except Exception as e:
-            return jsonify({"error": str(e)}), 500
+            return {"error": str(e)}, 500
 
 api.add_resource(AllTransactionHistory, "/all_transaction_history/<int:limit>")
 
 # ----------------------------
-# News (existing avec améliorations)
+# News - CHEMINS CORRIGÉS
 # ----------------------------
 class News(Resource):
     def get(self, type_, limit):
         try:
-            path = f'app/output_data/{type_}News.csv'
-            df = pd.read_csv(path)
+            # ✅ UTILISE LE CHEMIN DYNAMIQUE
+            csv_path = OUTPUT_DATA_DIR / f"{type_}News.csv"
+            
+            if not csv_path.exists():
+                return {"error": f"File not found: {csv_path}"}, 404
+            
+            df = pd.read_csv(csv_path)
             
             if df.shape[1] < 3:
-                return jsonify({"error": "CSV file format is incorrect"}), 400
+                return {"error": "CSV file format is incorrect"}, 400
             
             df.fillna("Empty", inplace=True)
             
-            # Sentiment analysis
             sia = SentimentIntensityAnalyzer()
             
             def get_sentiment(article):
@@ -378,10 +434,10 @@ class News(Resource):
             df['sentiment'] = df['article'].apply(get_sentiment)
             
             limited_data = df.tail(limit).iloc[::-1]
-            return jsonify(limited_data.to_dict(orient="records"))
+            return limited_data.to_dict(orient="records")
             
         except Exception as e:
-            return jsonify({"error": str(e)}), 500
+            return {"error": str(e)}, 500
 
 api.add_resource(News, "/news/<string:type_>/<int:limit>")
 
@@ -399,7 +455,6 @@ def handle_disconnect():
 
 @socketio.on('request_update')
 def handle_request_update():
-    """Client demande une mise à jour"""
     emit('bot_status', bot_status)
     
     if tech_indicators:
@@ -408,53 +463,6 @@ def handle_request_update():
             emit('technical_indicators', indicators)
         except:
             pass
-
-# ----------------------------
-# Background Tasks
-# ----------------------------
-def broadcast_updates():
-    """Envoie des mises à jour périodiques via WebSocket"""
-    while True:
-        time.sleep(5)  # Toutes les 5 secondes
-        
-        if tech_indicators:
-            try:
-                # Mettre à jour les indicateurs
-                candles = fetch_binance_klines(symbol="ETHUSDT", interval="1m", limit=100)
-                if candles:
-                    tech_indicators.candles.clear()
-                    for candle in candles[-100:]:
-                        tech_indicators.add_candle(candle)
-                    
-                    indicators = tech_indicators.get_all_indicators()
-                    socketio.emit('technical_indicators_update', indicators)
-            except Exception as e:
-                print(f"Error broadcasting updates: {e}")
-
-# Démarrer le thread de broadcast
-# threading.Thread(target=broadcast_updates, daemon=True).start()
-
-# ----------------------------
-# Start Background Scripts
-# ----------------------------
-def run_script(script_name):
-    """Démarre un script Python en subprocess"""
-    script_path = Path(__file__).parent / script_name
-    if script_path.exists():
-        print(f'Starting subprocess for {script_name}...')
-        subprocess.Popen(
-            ["python", str(script_path)], 
-            stdout=subprocess.PIPE, 
-            stderr=subprocess.PIPE, 
-            text=True
-        )
-        print(f'Subprocess for {script_name} started.')
-    else:
-        print(f'⚠️ Script not found: {script_path}')
-
-# Démarrer les scrapers
-# run_script("run_top_news_scraper.py")
-# run_script("run_all_news_scraper.py")
 
 # ----------------------------
 # Main
@@ -467,7 +475,13 @@ if __name__ == "__main__":
     print(f"✓ CORS enabled")
     print(f"✓ WebSocket enabled")
     print(f"✓ Technical indicators: {'Available' if tech_indicators else 'Not available'}")
+    print(f"✓ Output directory: {OUTPUT_DATA_DIR}")
+    print(f"   - Exists: {OUTPUT_DATA_DIR.exists()}")
+    if OUTPUT_DATA_DIR.exists():
+        files = list(OUTPUT_DATA_DIR.glob("*.csv"))
+        print(f"   - CSV files found: {len(files)}")
+        for f in files:
+            print(f"     • {f.name}")
     print("="*60 + "\n")
     
-    # Lancer avec WebSocket support
     socketio.run(app, host='0.0.0.0', port=5000, debug=False, allow_unsafe_werkzeug=True)
