@@ -8,25 +8,27 @@ const StatusCheck = () => {
   const [canProceed, setCanProceed] = useState(false)
   const [isOnline, setIsOnline] = useState(false)
   const [showOverlay, setShowOverlay] = useState(true)
+  const [isError, setIsError] = useState(false)
 
   useEffect(() => {
     const checkStatus = async () => {
       try {
         const response = await fetch("http://localhost:5000/")
         if (response.ok) {
-          setStatus("Flask app is running successfully!")
+          setStatus("🟢 Flask app is running successfully!")
           setCanProceed(true)
           setIsOnline(true)
+          setIsError(false)
           setShowOverlay(false)
         } else {
           throw new Error("Network response was not ok")
         }
       } catch (error) {
-        setStatus("Warning: Flask app is not running!")
+        setStatus("🔴 Warning: Flask app is not running!")
         setCanProceed(true)
+        setIsError(true)
       }
     }
-
     checkStatus()
   }, [])
 
@@ -39,11 +41,17 @@ const StatusCheck = () => {
     showOverlay && (
       <div className={`overlay ${!showOverlay && "hidden"}`}>
         <div className="overlay-content">
-          <p>{status}</p>
+          <p className={isError ? "error" : ""}>{status}</p>
           {canProceed && (
             <>
-              <p className="sub-warning">The site will not work as expected.</p>
-              <button onClick={handleProceed}>Proceed to the site</button>
+              {isError && (
+                <p className="sub-warning">
+                  ⚠️ The site will not work as expected without the backend.
+                </p>
+              )}
+              <button onClick={handleProceed}>
+                {isError ? "Proceed Anyway" : "Continue to Dashboard"}
+              </button>
             </>
           )}
         </div>

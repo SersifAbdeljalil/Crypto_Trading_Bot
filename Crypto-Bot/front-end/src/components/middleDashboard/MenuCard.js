@@ -5,7 +5,7 @@ class MenuCard extends Component {
     super(props)
     this.myRef = React.createRef()
   }
-
+  
   componentDidMount() {
     const script = document.createElement("script")
     script.src =
@@ -17,16 +17,24 @@ class MenuCard extends Component {
       defaultColumn: "overview",
       screener_type: "crypto_mkt",
       displayCurrency: "USD",
-      colorTheme: "light",
+      colorTheme: "dark", // Changed to dark theme to match Ethereum palette
       locale: "en",
       isTransparent: false,
     })
     this.myRef.current.appendChild(script)
   }
-
+  
   render() {
     return (
-      <div className="tradingview-widget-container" style={{ height: "400px"}} ref={this.myRef}>
+      <div 
+        className="tradingview-widget-container" 
+        style={{ 
+          height: "400px",
+          borderRadius: "12px",
+          overflow: "hidden"
+        }} 
+        ref={this.myRef}
+      >
         <div className="tradingview-widget-container__widget"></div>
       </div>
     )

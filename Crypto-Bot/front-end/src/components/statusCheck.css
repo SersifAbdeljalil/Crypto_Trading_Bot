@@ -1,10 +1,12 @@
+/* Ethereum-inspired overlay styles */
 .overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(15, 15, 35, 0.95);
+    backdrop-filter: blur(10px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -18,12 +20,16 @@
 
 .overlay-content {
     text-align: center;
-    color: white;
-    background: #1c1c1e;
-    padding: 40px 20px;
+    color: #E5E7EB;
+    background: linear-gradient(135deg, #1A1B3A 0%, #252641 100%);
+    padding: 50px 40px;
     border-radius: 20px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    border: 1px solid #2D2E4E;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(98, 126, 234, 0.1);
     animation: slideUp 0.5s ease-in-out;
+    max-width: 500px;
+    min-width: 400px;
 }
 
 .overlay.hidden .overlay-content {
@@ -31,41 +37,87 @@
 }
 
 .overlay-content p {
-    margin: 0 0 20px;
-    font-size: 18px;
+    margin: 0 0 25px;
+    font-size: 20px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 600;
+    background: linear-gradient(135deg, #627EEA, #00D4FF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .overlay-content button {
     color: white;
-    background: linear-gradient(145deg, #007aff, #005ecb);
+    background: linear-gradient(135deg, #627EEA, #00D4FF);
     border: none;
     border-radius: 12px;
-    padding: 12px 24px;
+    padding: 14px 32px;
     font-size: 16px;
+    font-weight: 600;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     cursor: pointer;
-    transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(98, 126, 234, 0.4);
 }
 
 .overlay-content button:hover {
-    background: linear-gradient(145deg, #005ecb, #007aff);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(135deg, #00D4FF, #627EEA);
+    box-shadow: 0 8px 30px rgba(98, 126, 234, 0.6);
     transform: translateY(-2px);
 }
 
+.overlay-content button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 16px rgba(98, 126, 234, 0.4);
+}
+
 .overlay-content .sub-warning {
-    margin-top: 10px;
+    margin-top: 15px;
     font-size: 14px;
-    color: #ffcccb;
+    color: #EF4444;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 500;
+    padding: 10px;
+    background-color: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    display: inline-block;
+}
+
+/* Status indicator */
+.overlay-content p:first-child::before {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background: linear-gradient(135deg, #10B981, #059669);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+    animation: pulse 2s infinite;
+}
+
+.overlay-content p.error::before {
+    background: linear-gradient(135deg, #EF4444, #DC2626);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
 }
 
 @keyframes fadeIn {
     from {
         opacity: 0;
     }
-
     to {
         opacity: 1;
     }
@@ -75,7 +127,6 @@
     from {
         opacity: 1;
     }
-
     to {
         opacity: 0;
     }
@@ -83,10 +134,9 @@
 
 @keyframes slideUp {
     from {
-        transform: translateY(20px);
+        transform: translateY(30px);
         opacity: 0;
     }
-
     to {
         transform: translateY(0);
         opacity: 1;
@@ -98,9 +148,25 @@
         transform: translateY(0);
         opacity: 1;
     }
-
     to {
-        transform: translateY(20px);
+        transform: translateY(30px);
         opacity: 0;
+    }
+}
+
+/* Responsive design */
+@media only screen and (max-width: 480px) {
+    .overlay-content {
+        min-width: 90%;
+        padding: 40px 30px;
+    }
+
+    .overlay-content p {
+        font-size: 18px;
+    }
+
+    .overlay-content button {
+        padding: 12px 24px;
+        font-size: 15px;
     }
 }

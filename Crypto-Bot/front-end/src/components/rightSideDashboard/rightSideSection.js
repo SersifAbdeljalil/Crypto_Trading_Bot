@@ -6,13 +6,30 @@ import axios from 'axios'
 
 const API_URL = "http://localhost:5000"
 
+// Ethereum-inspired color palette
+const COLORS = {
+  ethereumPurple: '#627EEA',
+  ethereumDark: '#1C1C3C',
+  ethereumLight: '#8A92B2',
+  blockchainBlue: '#00D4FF',
+  cryptoGreen: '#10B981',
+  cryptoRed: '#EF4444',
+  goldAccent: '#F59E0B',
+  darkBg: '#0F0F23',
+  cardBg: '#1A1B3A',
+  surface: '#252641',
+  border: '#2D2E4E',
+  textPrimary: '#E5E7EB',
+  textSecondary: '#9CA3AF',
+}
+
 const cryptoIcons = [
-  { symbol: "ETH", icon: <Icon.Eth color="black" /> },
-  { symbol: "LTC", icon: <Icon.Ltc color="black" /> },
-  { symbol: "XRP", icon: <Icon.Xrp color="black" /> },
-  { symbol: "BTC", icon: <Icon.Btc color="black" /> },
-  { symbol: "USDT", icon: <Icon.Usdt color="black" /> },
-  { symbol: "ADA", icon: <Icon.Ada color="black" /> },
+  { symbol: "ETH", icon: <Icon.Eth color={COLORS.ethereumPurple} /> },
+  { symbol: "LTC", icon: <Icon.Ltc color={COLORS.blockchainBlue} /> },
+  { symbol: "XRP", icon: <Icon.Xrp color={COLORS.blockchainBlue} /> },
+  { symbol: "BTC", icon: <Icon.Btc color={COLORS.goldAccent} /> },
+  { symbol: "USDT", icon: <Icon.Usdt color={COLORS.cryptoGreen} /> },
+  { symbol: "ADA", icon: <Icon.Ada color={COLORS.ethereumPurple} /> },
 ]
 
 const ResponsiveDiv = styled.div`
@@ -28,19 +45,21 @@ const ResponsiveDiv = styled.div`
 const StatusIndicator = styled.div`
   display: flex;
   align-items: center;
-  padding: 10px;
-  background-color: ${props => props.running ? '#d4edda' : '#f8d7da'};
-  border-radius: 8px;
-  margin-bottom: 10px;
+  padding: 12px 16px;
+  background-color: ${props => props.running ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'};
+  border: 1px solid ${props => props.running ? COLORS.cryptoGreen : COLORS.cryptoRed};
+  border-radius: 12px;
+  margin-bottom: 15px;
   
   &::before {
     content: '';
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background-color: ${props => props.running ? '#28a745' : '#dc3545'};
-    margin-right: 10px;
+    background-color: ${props => props.running ? COLORS.cryptoGreen : COLORS.cryptoRed};
+    margin-right: 12px;
     animation: ${props => props.running ? 'pulse 2s infinite' : 'none'};
+    box-shadow: ${props => props.running ? `0 0 10px ${COLORS.cryptoGreen}` : 'none'};
   }
   
   @keyframes pulse {
@@ -50,19 +69,19 @@ const StatusIndicator = styled.div`
 `
 
 const ErrorBanner = styled.div`
-  padding: 10px;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: 8px;
-  color: #721c24;
+  padding: 12px 16px;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid ${COLORS.cryptoRed};
+  border-radius: 10px;
+  color: ${COLORS.cryptoRed};
   margin-bottom: 15px;
   text-align: center;
   font-size: 0.9rem;
 `
 
 const LoadingSpinner = styled.div`
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #007AFF;
+  border: 4px solid ${COLORS.surface};
+  border-top: 4px solid ${COLORS.ethereumPurple};
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -104,7 +123,6 @@ const RightSideSection = () => {
   const [error, setError] = useState(null)
   const [apiOnline, setApiOnline] = useState(false)
 
-  // Fetch bot status
   const fetchBotStatus = async () => {
     try {
       const response = await axios.get(`${API_URL}/bot_status`, { timeout: 5000 })
@@ -120,7 +138,6 @@ const RightSideSection = () => {
     }
   }
 
-  // Fetch statistics - MAINTENANT CORRIGÉ ✅
   const fetchStatistics = async () => {
     try {
       const response = await axios.get(`${API_URL}/statistics`, { timeout: 5000 })
@@ -132,14 +149,12 @@ const RightSideSection = () => {
       }
     } catch (error) {
       console.error('Error fetching statistics:', error)
-      // Ne pas afficher d'erreur si c'est juste les stats qui manquent
       if (error.response?.status === 500) {
         console.warn('Statistics endpoint error (peut-être pas de données encore)')
       }
     }
   }
 
-  // Fetch model prediction
   const fetchPrediction = async () => {
     try {
       const response = await axios.get(`${API_URL}/model_prediction`, { timeout: 5000 })
@@ -152,7 +167,6 @@ const RightSideSection = () => {
     }
   }
 
-  // Control bot (start/stop)
   const controlBot = async (action) => {
     try {
       const response = await axios.post(`${API_URL}/bot_control`, { action }, { timeout: 5000 })
@@ -168,7 +182,6 @@ const RightSideSection = () => {
     }
   }
 
-  // Check API health
   const checkApiHealth = async () => {
     try {
       const response = await axios.get(`${API_URL}/`, { timeout: 3000 })
@@ -185,7 +198,6 @@ const RightSideSection = () => {
   }
 
   useEffect(() => {
-    // Initial health check
     const initializeData = async () => {
       setLoading(true)
       
@@ -204,14 +216,12 @@ const RightSideSection = () => {
     
     initializeData()
 
-    // Poll every 5 seconds
     const interval = setInterval(async () => {
       if (apiOnline) {
         fetchBotStatus()
         fetchStatistics()
         fetchPrediction()
       } else {
-        // Retry connection
         await checkApiHealth()
       }
     }, 5000)
@@ -223,13 +233,14 @@ const RightSideSection = () => {
     return (
       <ResponsiveDiv>
         <div style={{
-          backgroundColor: "#fff",
-          borderRadius: "10px",
+          backgroundColor: COLORS.cardBg,
+          borderRadius: "16px",
           padding: "40px",
-          textAlign: "center"
+          textAlign: "center",
+          border: `1px solid ${COLORS.border}`
         }}>
           <LoadingSpinner />
-          <p style={{ color: "#777", marginTop: "20px" }}>
+          <p style={{ color: COLORS.textSecondary, marginTop: "20px" }}>
             Chargement des données du bot...
           </p>
         </div>
@@ -239,40 +250,37 @@ const RightSideSection = () => {
 
   return (
     <ResponsiveDiv>
-      {/* Bot Status Card */}
       <div
         style={{
           flex: 1,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          backgroundColor: "#fff",
-          borderRadius: "10px",
-          padding: "20px",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+          backgroundColor: COLORS.cardBg,
+          borderRadius: "16px",
+          padding: "24px",
+          boxShadow: `0 8px 32px rgba(0, 0, 0, 0.4)`,
           marginBottom: "20px",
+          border: `1px solid ${COLORS.border}`
         }}
       >
         <p
           style={{
-            color: "#333",
+            color: COLORS.textPrimary,
             marginTop: "0",
-            fontSize: "1.5rem",
+            fontSize: "1.8rem",
             fontWeight: "bold",
             fontFamily: "Arial, sans-serif",
+            background: `linear-gradient(135deg, ${COLORS.ethereumPurple}, ${COLORS.blockchainBlue})`,
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
           }}
         >
           Contrôle du Bot
         </p>
         
-        {/* Error Banner */}
-        {error && (
-          <ErrorBanner>
-            ⚠️ {error}
-          </ErrorBanner>
-        )}
+        {error && <ErrorBanner>⚠️ {error}</ErrorBanner>}
 
-        {/* API Status */}
         {!apiOnline && (
           <ErrorBanner>
             🔴 Serveur Flask non accessible - Vérifiez que le backend est démarré
@@ -280,21 +288,20 @@ const RightSideSection = () => {
         )}
         
         <StatusIndicator running={botStatus.running}>
-          <span style={{ fontWeight: 'bold', fontFamily: "Arial, sans-serif" }}>
+          <span style={{ fontWeight: 'bold', fontFamily: "Arial, sans-serif", color: COLORS.textPrimary }}>
             Statut: {botStatus.running ? 'EN MARCHE' : 'ARRÊTÉ'}
           </span>
         </StatusIndicator>
 
         <div
           style={{
-            backgroundColor: "#e0e0e0",
+            backgroundColor: COLORS.border,
             width: "100%",
-            height: 2,
-            marginBottom: "20px",
+            height: 1,
+            marginBottom: "24px",
           }}
         ></div>
 
-        {/* User Control Section */}
         <div
           style={{
             width: "100%",
@@ -305,16 +312,16 @@ const RightSideSection = () => {
         >
           <select
             style={{
-              backgroundColor: "#fff",
-              border: "1px solid #ddd",
-              color: "#333",
+              backgroundColor: COLORS.surface,
+              border: `2px solid ${COLORS.border}`,
+              color: COLORS.textPrimary,
               width: "50%",
               fontSize: "1rem",
-              borderRadius: "5px",
-              padding: "8px",
+              borderRadius: "10px",
+              padding: "10px 12px",
               cursor: "pointer",
               fontFamily: "Arial, sans-serif",
-              marginBottom: "15px"
+              marginBottom: "20px"
             }}
             value={symbol}
             onChange={(e) => setSymbol(e.target.value)}
@@ -331,68 +338,75 @@ const RightSideSection = () => {
               display: "flex",
               justifyContent: "space-between",
               width: "80%",
-              marginBottom: "20px",
+              marginBottom: "24px",
+              gap: "12px"
             }}
           >
             <button
               onClick={() => controlBot('start')}
               disabled={botStatus.running || !apiOnline}
               style={{
-                backgroundColor: (botStatus.running || !apiOnline) ? "#ccc" : "#28a745",
-                borderRadius: "8px",
+                background: (botStatus.running || !apiOnline) 
+                  ? COLORS.surface 
+                  : `linear-gradient(135deg, ${COLORS.cryptoGreen}, #059669)`,
+                borderRadius: "10px",
                 width: "48%",
-                padding: "12px",
-                color: "white",
+                padding: "14px",
+                color: (botStatus.running || !apiOnline) ? COLORS.textSecondary : "white",
                 border: "none",
                 cursor: (botStatus.running || !apiOnline) ? "not-allowed" : "pointer",
                 fontWeight: "bold",
                 fontFamily: "Arial, sans-serif",
-                fontSize: "1rem"
+                fontSize: "1rem",
+                boxShadow: (botStatus.running || !apiOnline) ? "none" : `0 4px 16px rgba(16, 185, 129, 0.3)`
               }}
             >
-              {botStatus.running ? "En marche..." : "Démarrer"}
+              {botStatus.running ? "En marche..." : "🚀 Démarrer"}
             </button>
             <button
               onClick={() => controlBot('stop')}
               disabled={!botStatus.running || !apiOnline}
               style={{
-                backgroundColor: (!botStatus.running || !apiOnline) ? "#ccc" : "#dc3545",
-                borderRadius: "8px",
+                background: (!botStatus.running || !apiOnline) 
+                  ? COLORS.surface 
+                  : `linear-gradient(135deg, ${COLORS.cryptoRed}, #DC2626)`,
+                borderRadius: "10px",
                 width: "48%",
-                padding: "12px",
-                color: "white",
+                padding: "14px",
+                color: (!botStatus.running || !apiOnline) ? COLORS.textSecondary : "white",
                 border: "none",
                 cursor: (!botStatus.running || !apiOnline) ? "not-allowed" : "pointer",
                 fontWeight: "bold",
                 fontFamily: "Arial, sans-serif",
-                fontSize: "1rem"
+                fontSize: "1rem",
+                boxShadow: (!botStatus.running || !apiOnline) ? "none" : `0 4px 16px rgba(239, 68, 68, 0.3)`
               }}
             >
-              Arrêter
+              ⏹️ Arrêter
             </button>
           </div>
 
-          {/* Last Action */}
           <div style={{
             width: "100%",
-            padding: "10px",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "8px",
-            marginBottom: "15px",
+            padding: "16px",
+            backgroundColor: COLORS.surface,
+            border: `1px solid ${COLORS.border}`,
+            borderRadius: "12px",
+            marginBottom: "20px",
             textAlign: "center"
           }}>
-            <div style={{ color: "#777", fontSize: "0.9rem", marginBottom: "5px" }}>
+            <div style={{ color: COLORS.textSecondary, fontSize: "0.9rem", marginBottom: "8px" }}>
               Dernière Action
             </div>
             <div style={{
-              fontSize: "1.3rem",
+              fontSize: "1.5rem",
               fontWeight: "bold",
-              color: botStatus.last_action === 'BUY' ? '#28a745' : 
-                     botStatus.last_action === 'SELL' ? '#dc3545' : '#6c757d'
+              color: botStatus.last_action === 'BUY' ? COLORS.cryptoGreen : 
+                     botStatus.last_action === 'SELL' ? COLORS.cryptoRed : COLORS.textSecondary
             }}>
               {botStatus.last_action}
             </div>
-            <div style={{ color: "#777", fontSize: "0.8rem", marginTop: "5px" }}>
+            <div style={{ color: COLORS.textSecondary, fontSize: "0.85rem", marginTop: "8px" }}>
               Confiance: {(botStatus.confidence * 100).toFixed(1)}%
             </div>
           </div>
@@ -400,26 +414,33 @@ const RightSideSection = () => {
 
         <div
           style={{
-            backgroundColor: "#e0e0e0",
+            backgroundColor: COLORS.border,
             width: "100%",
-            height: 2,
-            margin: "15px 0",
+            height: 1,
+            margin: "20px 0",
           }}
         ></div>
 
-        {/* Bot Statistics Section */}
         <div
           style={{
-            color: "#333",
+            color: COLORS.textPrimary,
             display: "flex",
             flexDirection: "column",
             width: "100%",
             fontFamily: "Arial, sans-serif",
           }}
         >
-          <h3 style={{ margin: "10px 0", textAlign: "center" }}>Statistiques de Performance</h3>
+          <h3 style={{ 
+            margin: "10px 0 20px 0", 
+            textAlign: "center",
+            background: `linear-gradient(135deg, ${COLORS.ethereumPurple}, ${COLORS.blockchainBlue})`,
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}>
+            Statistiques de Performance
+          </h3>
           
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", padding: "10px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", padding: "10px" }}>
             <StatCard 
               label="Profit Net" 
               value={`$${statistics.net_profit.toFixed(2)}`}
@@ -454,23 +475,29 @@ const RightSideSection = () => {
 
         <div
           style={{
-            backgroundColor: "#e0e0e0",
+            backgroundColor: COLORS.border,
             width: "100%",
-            height: 2,
-            margin: "15px 0",
+            height: 1,
+            margin: "20px 0",
           }}
         ></div>
 
-        {/* Model Prediction */}
         <div style={{ width: "100%", padding: "10px" }}>
-          <h3 style={{ margin: "10px 0", textAlign: "center", color: "#333" }}>
+          <h3 style={{ 
+            margin: "10px 0 20px 0", 
+            textAlign: "center", 
+            color: COLORS.textPrimary,
+            background: `linear-gradient(135deg, ${COLORS.ethereumPurple}, ${COLORS.blockchainBlue})`,
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}>
             Prédiction du Modèle
           </h3>
           
           <div style={{ marginTop: "15px" }}>
-            <PredictionBar label="HOLD" value={prediction.hold} color="#6c757d" />
-            <PredictionBar label="BUY" value={prediction.buy} color="#28a745" />
-            <PredictionBar label="SELL" value={prediction.sell} color="#dc3545" />
+            <PredictionBar label="HOLD" value={prediction.hold} color={COLORS.textSecondary} />
+            <PredictionBar label="BUY" value={prediction.buy} color={COLORS.cryptoGreen} />
+            <PredictionBar label="SELL" value={prediction.sell} color={COLORS.cryptoRed} />
           </div>
         </div>
       </div>
@@ -478,27 +505,26 @@ const RightSideSection = () => {
   )
 }
 
-// Helper Components
 const StatCard = ({ label, value, positive }) => (
   <div
     style={{
-      padding: "15px",
-      backgroundColor: "#f8f9fa",
-      borderRadius: "8px",
+      padding: "16px",
+      backgroundColor: COLORS.surface,
+      border: `1px solid ${COLORS.border}`,
+      borderRadius: "12px",
       textAlign: "center",
-      border: "1px solid #e0e0e0"
     }}
   >
-    <div style={{ color: "#777", fontSize: "0.85rem", marginBottom: "5px" }}>
+    <div style={{ color: COLORS.textSecondary, fontSize: "0.85rem", marginBottom: "8px" }}>
       {label}
     </div>
     <div
       style={{
-        fontSize: "1.2rem",
+        fontSize: "1.3rem",
         fontWeight: "bold",
         color: positive !== undefined 
-          ? (positive ? "#28a745" : "#dc3545")
-          : "#333"
+          ? (positive ? COLORS.cryptoGreen : COLORS.cryptoRed)
+          : COLORS.textPrimary
       }}
     >
       {value}
@@ -507,28 +533,30 @@ const StatCard = ({ label, value, positive }) => (
 )
 
 const PredictionBar = ({ label, value, color }) => (
-  <div style={{ marginBottom: "12px" }}>
+  <div style={{ marginBottom: "16px" }}>
     <div style={{ 
       display: "flex", 
       justifyContent: "space-between", 
-      marginBottom: "5px",
-      fontSize: "0.9rem"
+      marginBottom: "8px",
+      fontSize: "0.95rem"
     }}>
-      <span style={{ fontWeight: "bold" }}>{label}</span>
-      <span>{(value * 100).toFixed(1)}%</span>
+      <span style={{ fontWeight: "bold", color: COLORS.textPrimary }}>{label}</span>
+      <span style={{ color: COLORS.textSecondary }}>{(value * 100).toFixed(1)}%</span>
     </div>
     <div style={{
       width: "100%",
-      height: "20px",
-      backgroundColor: "#e0e0e0",
-      borderRadius: "10px",
+      height: "24px",
+      backgroundColor: COLORS.surface,
+      border: `1px solid ${COLORS.border}`,
+      borderRadius: "12px",
       overflow: "hidden"
     }}>
       <div style={{
         width: `${value * 100}%`,
         height: "100%",
-        backgroundColor: color,
-        transition: "width 0.3s ease"
+        background: `linear-gradient(90deg, ${color}, ${color}dd)`,
+        transition: "width 0.3s ease",
+        boxShadow: `0 0 12px ${color}66`
       }}></div>
     </div>
   </div>

@@ -4,31 +4,53 @@ import * as Icon from "react-cryptocoins"
 import moment from "moment"
 import styled from "styled-components"
 
+// Ethereum-inspired color palette
+const COLORS = {
+  ethereumPurple: '#627EEA',
+  ethereumDark: '#1C1C3C',
+  ethereumLight: '#8A92B2',
+  blockchainBlue: '#00D4FF',
+  cryptoGreen: '#10B981',
+  cryptoRed: '#EF4444',
+  goldAccent: '#F59E0B',
+  darkBg: '#0F0F23',
+  cardBg: '#1A1B3A',
+  surface: '#252641',
+  border: '#2D2E4E',
+  textPrimary: '#E5E7EB',
+  textSecondary: '#9CA3AF',
+}
+
 // Crypto Icons definition
 const cryptoIcons = {
-  ETH: <Icon.Eth color="black" />,
-  LTC: <Icon.Ltc color="black" />,
-  XRP: <Icon.Xrp color="black" />,
-  BTC: <Icon.Btc color="black" />,
+  ETH: <Icon.Eth color={COLORS.ethereumPurple} />,
+  LTC: <Icon.Ltc color={COLORS.blockchainBlue} />,
+  XRP: <Icon.Xrp color={COLORS.blockchainBlue} />,
+  BTC: <Icon.Btc color={COLORS.goldAccent} />,
 }
 
 const url = "http://localhost:5000/"
 
 const Card = styled.div`
-  padding: 20px;
-  background-color: #ffffff;
-  border-radius: 15px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  background-color: ${COLORS.cardBg};
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   transition: transform 0.2s ease-in-out, flex 0.2s ease-in-out,
     height 0.3s ease-in-out;
   margin-bottom: 20px;
   flex: 1;
   overflow: hidden;
+  border: 1px solid ${COLORS.border};
 `
 
 const Title = styled.h2`
   margin-bottom: 20px;
-  color: #333;
+  color: ${COLORS.textPrimary};
+  font-size: 1.8rem;
+  background: linear-gradient(135deg, ${COLORS.ethereumPurple}, ${COLORS.blockchainBlue});
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 `
 
 const Header = styled.div`
@@ -45,7 +67,8 @@ const ToggleContainer = styled.div`
   position: relative;
   width: 120px;
   height: 40px;
-  background-color: #e6e6e6;
+  background-color: ${COLORS.surface};
+  border: 1px solid ${COLORS.border};
   border-radius: 20px;
   padding: 5px;
   cursor: pointer;
@@ -57,40 +80,43 @@ const ToggleSwitch = styled.div`
   left: ${props => (props.active ? "65px" : "5px")};
   width: 50px;
   height: 30px;
-  background-color: white;
+  background: linear-gradient(135deg, ${COLORS.ethereumPurple}, ${COLORS.blockchainBlue});
   border-radius: 15px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 4px 12px rgba(98, 126, 234, 0.4);
   transition: left 0.3s;
 `
 
 const ToggleLabel = styled.span`
   font-size: 14px;
-  color: ${props => (props.active ? "#007AFF" : "#aaa")};
+  color: ${props => (props.active ? COLORS.textPrimary : COLORS.textSecondary)};
   z-index: 1;
   flex: 1;
   text-align: center;
+  font-weight: ${props => (props.active ? "bold" : "normal")};
 `
 
 const NewsItemContainer = styled.a`
   display: flex;
   align-items: center;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 10px;
-  margin-bottom: 10px;
+  padding: 14px;
+  background-color: ${COLORS.surface};
+  border: 1px solid ${COLORS.border};
+  border-radius: 12px;
+  margin-bottom: 12px;
   justify-content: space-between;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   text-decoration: none;
   color: inherit;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 
   &:hover {
-    background-color: #f1f1f1;
+    background-color: ${COLORS.border};
+    transform: translateX(4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   }
 `
 
 const NewsDate = styled.div`
-  color: #777;
+  color: ${COLORS.textSecondary};
   font-size: 12px;
   flex: 1.5;
 `
@@ -100,58 +126,69 @@ const NewsTitle = styled.div`
   flex: 4;
   margin-left: 20px;
   margin-right: 20px;
+  color: ${COLORS.textPrimary};
 `
 
 const NewsSentiment = styled.div`
   flex: 1;
   display: flex;
   justify-content: center;
-  padding: 5px 10px;
-  border-radius: 10px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
   color: ${props =>
-    props.positive ? "#60BC3F" : props.negative ? "#DB3E62" : "#777"};
+    props.positive ? COLORS.cryptoGreen : props.negative ? COLORS.cryptoRed : COLORS.textSecondary};
   background-color: ${props =>
     props.positive
-      ? "rgba(96,188,63,0.2)"
+      ? "rgba(16, 185, 129, 0.15)"
       : props.negative
-      ? "rgba(219,62,98,0.2)"
-      : "rgba(119,119,119,0.2)"};
+      ? "rgba(239, 68, 68, 0.15)"
+      : "rgba(138, 146, 178, 0.15)"};
+  border: 1px solid ${props =>
+    props.positive ? COLORS.cryptoGreen : props.negative ? COLORS.cryptoRed : COLORS.border};
 `
 
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   overflow: auto;
-  padding: 20px;
-  background-color: #f8f9fa;
+  padding: 0;
+  background-color: transparent;
   border-radius: 10px;
-  color: #333;
+  color: ${COLORS.textPrimary};
   font-family: Arial, sans-serif;
 
-  /* Custom scrollbar */
   &::-webkit-scrollbar {
     width: 8px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #ccc;
+    background: ${COLORS.border};
     border-radius: 10px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background: #aaa;
+    background: ${COLORS.ethereumLight};
   }
 `
 
 const TransactionContainer = styled.div`
   display: flex;
   align-items: center;
-  padding: 10px;
-  background-color: #ffffff;
-  border-radius: 10px;
-  margin-bottom: 10px;
+  padding: 14px;
+  background-color: ${COLORS.surface};
+  border: 1px solid ${COLORS.border};
+  border-radius: 12px;
+  margin-bottom: 12px;
   justify-content: space-between;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: ${COLORS.border};
+    transform: translateX(4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
 `
 
 const IconContainer = styled.div`
@@ -161,12 +198,15 @@ const IconContainer = styled.div`
 `
 
 const Text = styled.div`
-  color: #333;
+  color: ${COLORS.textPrimary};
   margin-left: 10px;
+  font-weight: bold;
 `
 
 const InfoLabel = styled.div`
-  color: #777;
+  color: ${COLORS.textSecondary};
+  font-size: 0.75rem;
+  margin-top: 4px;
 `
 
 const SideContainer = styled.div`
@@ -177,46 +217,48 @@ const SideContainer = styled.div`
 const SideIndicator = styled.div`
   width: 10px;
   height: 10px;
-  background-color: ${props => (props.sell ? "#DB3E62" : "#60BC3F")};
+  background-color: ${props => (props.sell ? COLORS.cryptoRed : COLORS.cryptoGreen)};
   border-radius: 50%;
-  margin-right: 5px;
+  margin-right: 8px;
+  box-shadow: ${props => 
+    props.sell 
+      ? `0 0 10px ${COLORS.cryptoRed}` 
+      : `0 0 10px ${COLORS.cryptoGreen}`};
 `
+
 const Info = styled.div`
-  color: #333;
+  color: ${COLORS.textPrimary};
   font-size: 14px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  font-weight: 600;
 `
 
 const TransactionSectionContainer = styled(Card)`
   max-height: 590px;
-  overflow-y: auto; /* Makes the container vertically scrollable */
+  overflow-y: auto;
 
-  /* Hide the scrollbar for WebKit-based browsers (Chrome, Safari) */
   &::-webkit-scrollbar {
     display: none;
   }
 
-  /* Hide the scrollbar for other browsers */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 `
 
 const NewsSectionContainer = styled(Card)`
   max-height: 590px;
-  overflow-y: auto; /* Makes the container vertically scrollable */
+  overflow-y: auto;
 
-  /* Hide the scrollbar for WebKit-based browsers (Chrome, Safari) */
   &::-webkit-scrollbar {
     display: none;
   }
 
-  /* Hide the scrollbar for other browsers */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 `
 
 const MainContainer = styled.div`
@@ -224,7 +266,6 @@ const MainContainer = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  /* background-color: #f0f2f5; */
   min-height: 100vh;
 `
 
@@ -232,7 +273,6 @@ const CardContainer = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  /* max-width: 800px; */
 `
 
 const TransactionSection = () => {
@@ -266,8 +306,6 @@ const TransactionSection = () => {
 
 const SingleTransactionContainer = ({ transaction }) => {
   const icon_name = transaction.symbol
-  console.log(transaction)
-  console.log(icon_name)
 
   return (
     <TransactionContainer>
@@ -292,7 +330,7 @@ const SingleTransactionContainer = ({ transaction }) => {
       {transaction.side === "SELL" && (
         <Info
           style={{
-            color: transaction.profits <= 0 ? "#DB3E62" : "#60BC3F",
+            color: transaction.profits <= 0 ? COLORS.cryptoRed : COLORS.cryptoGreen,
           }}
         >
           {transaction.profits === "---"
