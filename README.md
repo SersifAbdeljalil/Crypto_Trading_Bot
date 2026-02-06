@@ -1,15 +1,16 @@
-## PPO agent trained on Ethereum price data; backtesting only.
+# Ethereum Automated Trading Agent
+
 <div align="center">
 
 ![Ethereum Trading](https://img.shields.io/badge/Crypto-Ethereum-blue)
 ![RL Algorithm](https://img.shields.io/badge/Algorithm-PPO-green)
 ![Python](https://img.shields.io/badge/Python-3.8+-yellow)
 ![TensorFlow](https://img.shields.io/badge/Framework-TensorFlow-orange)
-![Status](https://img.shields.io/badge/Status-In_Development-red)
+![Status](https://img.shields.io/badge/Status-Backtesting_Complete-brightgreen)
 
-**Automated trading agent based on Reinforcement Learning for Ethereum trading**
+**Reinforcement Learning agent trained on historical Ethereum price data with backtesting analysis**
 
-[Demo](#demo) • [Installation](#installation) • [Documentation](#documentation) • [Known Issues](#known-issues)
+[About](#about-the-project) • [Backtesting Results](#backtesting-results) • [Installation](#installation) • [Extensions](#team-extensions)
 
 </div>
 
@@ -24,89 +25,85 @@
 ## Table of Contents
 
 - [About the Project](#about-the-project)
-- [System Architecture](#system-architecture)
+- [Core Project Scope](#core-project-scope)
 - [Backtesting Results](#backtesting-results)
+- [Team Extensions](#team-extensions)
 - [Technologies Used](#technologies-used)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Frontend Interface](#frontend-interface)
-- [Known Issues](#known-issues)
 
 ---
 
 ## About the Project
 
-This project implements an **automated trading agent** that uses the **PPO (Proximal Policy Optimization)** algorithm to make trading decisions on Ethereum (ETH/USDT). The agent has been trained on historical data and is capable of analyzing real-time market conditions to execute automatic transactions.
+This project implements a **PPO (Proximal Policy Optimization) agent** trained exclusively on **historical Ethereum price data (2017-2018)**. The agent was developed for **backtesting purposes only**, without deployment in real-time trading conditions.
 
-### Project Objectives
+### Project Objectives (Core Requirement)
 
-- Develop an RL agent capable of automatically trading Ethereum
-- Backtest the strategy on historical data
-- Deploy the agent on real-time data via the Binance API
-- Create a web interface to visualize performance
-- Optimize real-time decisions (in progress)
+✅ **Completed:**
+- Develop an RL agent capable of learning Ethereum trading strategies
+- Train the agent on historical data (2017-2018)
+- Backtest the strategy and evaluate performance
+- Visualize trading decisions and profitability
 
-### Main Features
+### What This Project IS
 
-- **Artificial Intelligence**: PPO Agent (Actor-Critic) trained with TensorFlow/Keras
-- **Technical Analysis**: Integration of 20+ technical and fundamental indicators
-- **Real-Time Trading**: WebSocket connection to Binance for live data
-- **Backtesting**: Tests on historical data with performance visualization
-- **Web Interface**: React/Gatsby dashboard for real-time monitoring
-- **Crypto News**: Automatic news scraping for sentiment analysis
+- ✅ A **research and educational project** on reinforcement learning for algorithmic trading
+- ✅ A **backtesting framework** to evaluate PPO agent performance on historical data
+- ✅ A **proof-of-concept** demonstrating RL applications in cryptocurrency trading
+
+### What This Project IS NOT
+
+- ❌ **NOT** a real-time trading system deployed in production
+- ❌ **NOT** tested or validated on live market data
+- ❌ **NOT** financial advice or a guaranteed profitable strategy
 
 ---
 
-## System Architecture
+## Core Project Scope
 
-The project is divided into several main components:
+### Academic Requirements Met
+
+The core project fulfills the following academic objectives:
+
+1. **Reinforcement Learning Implementation**
+   - PPO (Proximal Policy Optimization) algorithm
+   - Actor-Critic architecture with CNN layers
+   - Custom Gym environment for trading simulation
+
+2. **Historical Data Training**
+   - Training dataset: Ethereum price data (2017-2018)
+   - 20+ features including on-chain metrics, market data, and sentiment indicators
+   - Sliding window approach (30-50 candles)
+
+3. **Backtesting & Evaluation**
+   - Comprehensive backtesting on historical episodes
+   - Performance metrics: profit %, Sharpe ratio, win rate
+   - Visualization of trading decisions and portfolio evolution
+
+### PPO Agent Architecture
 
 ```
-Ethereum Trading Agent
+Ethereum Trading Agent (Core)
 │
 ├── Reinforcement Learning Model
 │   ├── PPO Agent (Actor-Critic)
-│   ├── Backtesting Engine
-│   └── Training Pipeline
-│
-├── Flask API Backend
-│   ├── Data Collection
-│   ├── News Scraper
-│   ├── Technical Indicators
-│   └── Trading Bot Controller
-│
-├── React Frontend
-│   ├── TradingView Charts
-│   ├── Performance Dashboard
-│   ├── Transaction History
-│   └── Real-time Status
+│   ├── Custom Gym Environment
+│   ├── Training Pipeline
+│   └── Backtesting Engine
 │
 └── Data Pipeline
-    ├── Binance WebSocket
-    ├── Historical Data Storage
-    └── Feature Engineering
+    ├── Historical Data (CSV)
+    ├── Feature Engineering
+    └── Normalization & Preprocessing
 ```
 
-### Detailed Components
-
-#### 1. RL Model (PPO Agent)
+**Model Components:**
 - **Algorithm**: Proximal Policy Optimization (PPO)
 - **Architecture**: CNN + Dense Layers
 - **State**: Sliding window of 30-50 candles with 20 features
 - **Actions**: 3 possible actions (HOLD, BUY, SELL)
 - **Reward**: Based on profit and transaction fees
-
-#### 2. Flask API Backend
-- Real-time data collection from Binance
-- Crypto news scraping (CoinDesk, CoinTelegraph, etc.)
-- Technical indicator calculation (RSI, MACD, Bollinger Bands, etc.)
-- Trading order management
-
-#### 3. React/Gatsby Frontend
-- Price chart visualization (TradingView)
-- Transaction history display
-- Real-time performance monitoring
-- Bot status indicators (ACTIVE/STOPPED)
 
 ---
 
@@ -114,7 +111,7 @@ Ethereum Trading Agent
 
 ### Performance on Historical Data (2017-2018)
 
-The agent was tested on several trading episodes with the following results:
+The agent was trained and tested exclusively on historical data with the following results:
 
 | Episode | Initial Net Worth | Final Net Worth | Profit | No. Transactions |
 |---------|------------------|-----------------|--------|------------------|
@@ -147,7 +144,7 @@ The agent was tested on several trading episodes with the following results:
 | 268     | ![Episode 268](./Reinforcement_Learning/reinforcement_learning_trading_agent/train_trades_plot_episode_268.png) |
 | 323     | ![Episode 323](./Reinforcement_Learning/reinforcement_learning_trading_agent/train_trades_plot_episode_323.png) |
 
-**Performance Indicators**:
+**Performance Indicators** (Backtesting Only):
 - Success rate: ~65-70% on backtesting data
 - Maximum profit observed: +953% on one episode
 - Average number of trades per episode: 15-30
@@ -174,28 +171,83 @@ reinforcement_learning_trading_agent/
 
 ---
 
+## Team Extensions
+
+> **Note**: The following components were developed by our team as **extensions beyond the core academic requirements**. These features explore real-time integration possibilities but are **NOT part of the validated academic deliverable**.
+
+### Additional Architecture (Team Contribution)
+
+Our team extended the base project with the following components for exploration purposes:
+
+```
+Extended System Architecture (Team Addition)
+│
+├── Flask API Backend (Team Extension)
+│   ├── Real-time Data Collection from Binance
+│   ├── Crypto News Scraper (CoinDesk, CoinTelegraph)
+│   ├── Technical Indicators Calculator (RSI, MACD, Bollinger Bands)
+│   └── Trading Bot Controller (Experimental)
+│
+└── React/Gatsby Frontend (Team Extension)
+    ├── TradingView Charts Integration
+    ├── Performance Dashboard
+    ├── Transaction History Display
+    └── Real-time Bot Status Indicators
+```
+
+### Extended Features (Experimental)
+
+#### 1. Flask API Backend
+- **Real-time data collection** from Binance via WebSocket
+- **Crypto news scraping** from multiple sources for sentiment analysis
+- **Technical indicator calculation** (RSI, MACD, Bollinger Bands, etc.)
+- **Trading order management** interface (simulation mode)
+
+#### 2. React/Gatsby Frontend
+- **Price chart visualization** using TradingView widgets
+- **Transaction history** display and tracking
+- **Real-time performance monitoring** dashboard
+- **Bot control interface** (Start/Stop, Mode Selection)
+
+**Interface Screenshot:**
+
+![Frontend Dashboard](./frontend.png)
+
+*Experimental interface showing TradingView charts, transaction history, crypto news, and bot controls.*
+
+### ⚠️ Important Disclaimer for Extensions
+
+**The Flask API and Frontend components are:**
+- ✅ Functional for demonstration and learning purposes
+- ✅ Useful for understanding real-time trading system architecture
+- ❌ **NOT validated for real-time trading** performance
+- ❌ **NOT tested with live market data** beyond basic connectivity
+- ❌ **NOT recommended for actual trading** without extensive additional validation
+
+**Known Limitations:**
+- Distribution shift between training data (2017-2018) and current market conditions
+- Agent tends to predict HOLD in real-time scenarios (see Known Issues section)
+- No live trading validation or performance metrics
+
+---
+
 ## Technologies Used
 
-### Machine Learning & AI
-- **TensorFlow/Keras**: Main framework for the RL model
+### Core Project (Backtesting)
+- **TensorFlow/Keras**: RL model framework
 - **NumPy/Pandas**: Data manipulation and analysis
 - **Gym**: Custom RL training environment
+- **Matplotlib**: Backtesting visualization
 
-### Backend
-- **Flask**: REST API for backend
-- **WebSocket**: Real-time connection to Binance
+### Team Extensions
+- **Flask**: REST API backend
+- **WebSocket**: Real-time Binance connection
 - **Python-Binance**: API client for Binance
-- **Beautiful Soup**: Crypto news scraping
-
-### Frontend
-- **React**: UI library
-- **Gatsby**: SSG framework for React
-- **TradingView Widgets**: Advanced trading charts
+- **Beautiful Soup**: News scraping
+- **React**: Frontend UI library
+- **Gatsby**: Static site generator
+- **TradingView Widgets**: Chart integration
 - **Chart.js**: Custom visualizations
-
-### Database & Storage
-- **CSV Files**: Historical data storage
-- **TensorBoard**: Training metrics visualization
 
 ---
 
@@ -204,37 +256,41 @@ reinforcement_learning_trading_agent/
 ### Prerequisites
 
 - Python 3.8+
-- Node.js 14+
-- npm or yarn
-- Binance account (for real trading)
+- Node.js 14+ (for frontend extensions only)
+- npm or yarn (for frontend extensions only)
 
-### 1. Clone the Repository
+### Core Project Setup (Backtesting Only)
 
 ```bash
+# Clone the repository
 git clone https://github.com/your-username/ethereum-trading-agent.git
 cd ethereum-trading-agent
-```
 
-### 2. Backend Installation (RL Model + Flask API)
-
-```bash
-# Create a virtual environment
+# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 # or
 venv\Scripts\activate  # Windows
 
-# Install dependencies
+# Install core dependencies
 cd reinforcement_learning_trading_agent
 pip install -r requirements.txt
-
-# Configure environment variables
-cd ../flask-api
-cp .env.example .env
-# Edit .env with your Binance API keys
 ```
 
-### 3. Frontend Installation
+### Extended Features Setup (Optional)
+
+#### Flask API Backend
+
+```bash
+cd flask-api
+pip install -r requirements.txt
+
+# Create environment configuration
+cp .env.example .env
+# Edit .env with your settings (optional for backtesting)
+```
+
+#### React Frontend
 
 ```bash
 cd front-end
@@ -243,51 +299,51 @@ npm install
 yarn install
 ```
 
-### 4. Configuration
-
-Create a `.env` file in `flask-api/`:
-
-```env
-SECRET_KEY=your_secret_key
-API_KEY=your_binance_api_key
-API_SECRET=your_binance_api_secret
-TRADE_SYMBOL=ETHUSDT
-TRADE_QUANTITY=0.05
-SIMULATION_MODE=True  # Set to False for real trading
-```
-
-**IMPORTANT**: NEVER share your API keys. Add `.env` to your `.gitignore`.
-
 ---
 
 ## Usage
 
-### 1. Train the Model (Optional)
+### Core Project: Backtesting
+
+#### 1. Train the PPO Agent
 
 ```bash
 cd reinforcement_learning_trading_agent
 python main.py --mode train --episodes 500 --batch-size 500
 ```
 
-### 2. Launch the Flask API
+#### 2. Run Backtesting
+
+```bash
+python main.py --mode test --episodes 10 --model-path ./2026_01_31_10_38_Crypto_trader
+```
+
+This will generate:
+- Trading performance charts
+- Episode statistics
+- Profit/loss analysis
+
+### Extended Features (Optional)
+
+#### 1. Launch Flask API (Experimental)
 
 ```bash
 cd flask-api/src
 python app/app.py
 ```
 
-The API will be accessible at `http://localhost:5000`
+API accessible at `http://localhost:5000`
 
-### 3. Launch the Trading Bot
+#### 2. Launch Trading Bot (Simulation Mode)
 
 ```bash
 cd flask-api/src
 python trading_bot/trading_bot.py
 ```
 
-The bot will connect to Binance via WebSocket and start analyzing the market.
+⚠️ **Always use SIMULATION_MODE=True in .env**
 
-### 4. Launch the Frontend
+#### 3. Launch Frontend Dashboard
 
 ```bash
 cd front-end
@@ -296,109 +352,37 @@ npm run develop
 yarn develop
 ```
 
-The interface will be accessible at `http://localhost:8000`
-
----
-
-## Frontend Interface
-
-### Main Dashboard
-
-The interface displays several sections:
-
-1. **Price Chart**: TradingView widget with real-time candlesticks
-2. **Technical Indicators**: RSI, MACD, Bollinger Bands, etc.
-3. **Transaction History**: List of recent buys/sells
-4. **Crypto News**: Real-time news
-5. **Model Predictions**: Probabilities for HOLD/BUY/SELL
-6. **Performance Statistics**: Net profit, success rate, etc.
-
-### Bot Control
-
-The interface allows you to:
-- Start/Stop the bot
-- Choose the mode (Simulation/Real)
-- Set trading quantity
-- See real-time status
-
-**Interface Screenshot:**
-
-![Frontend Dashboard](./frontend.png)
-
-*Complete interface showing TradingView charts, transaction history, crypto news, and bot controls.*
+Interface accessible at `http://localhost:8000`
 
 ---
 
 ## Known Issues
 
-### Main Issue: Agent Stays in HOLD Mode
+### Main Issue: Real-Time Performance Gap
 
-**Description**: During real-time execution, the agent mainly predicts the HOLD action and does not generate BUY or SELL signals, even in favorable market conditions.
+**Description**: While the agent performs well on backtesting (historical data), it does not perform effectively when connected to real-time data streams.
 
-**Symptoms**:
+**Symptoms in Real-Time Mode**:
 - HOLD probability > 60-80%
 - BUY/SELL probability < 20%
 - No transactions executed for long periods
 
-**Potential Causes**:
+**Root Causes**:
 
 1. **Distribution Shift**
-   - The agent was trained on historical data (2017-2018)
+   - Agent trained on 2017-2018 data
    - Current market patterns differ significantly
-   - External features are not dynamic enough
+   - Model hasn't been retrained on recent data
 
-2. **Confidence Threshold Too High**
-   - The MIN_CONFIDENCE threshold (35%) may be too conservative
-   - The agent prefers safety over risk
+2. **Static Features**
+   - External features (Google Trends, VIX) don't vary enough in real-time
+   - Model doesn't perceive significant state changes
 
-3. **Static Features**
-   - External data (Google Trends, VIX, etc.) doesn't vary enough
-   - The model doesn't perceive significant changes in state
+3. **Normalization Issues**
+   - Normalized values may not reflect current market volatility
+   - Bias towards historical mean values
 
-4. **Incorrect Normalization**
-   - Normalized values may not reflect real volatility
-   - Bias towards average values observed during training
-
-**Solutions in Progress**:
-
-**Implemented**:
-- Addition of real-time CoinGecko API data
-- Feature variation based on price trend
-- Detailed prediction logging
-
-**In Development**:
-- Retraining on recent data (2023-2025)
-- Fine-tuning with live data
-- Dynamic confidence threshold adjustment
-- Increased feature diversity
-
-**To Test**:
-- Modification of reward function
-- Forced exploration (epsilon-greedy)
-- Ensemble of models with majority voting
-
----
-
-## Metrics and Evaluation
-
-### Training Metrics
-
-The model is evaluated based on:
-
-- **Episode Reward**: Cumulative reward per episode
-- **Net Worth**: Final portfolio value
-- **Number of Trades**: Number of transactions executed
-- **Actor Loss**: Policy loss (Actor)
-- **Critic Loss**: Value function loss (Critic)
-
-### Backtesting vs Live Trading
-
-| Metric                | Backtesting (2017-2018) | Live Trading (2025) |
-|-----------------------|-------------------------|---------------------|
-| Average profit        | +150% to +900%          | 0% (HOLD only)      |
-| Trades per day        | 5-10                    | 0-1                 |
-| Success rate          | 65-70%                  | N/A                 |
-| Sharpe Ratio          | 1.8-2.2                 | N/A                 |
+**This is why the project remains in backtesting-only scope.**
 
 ---
 
@@ -408,7 +392,7 @@ The model is evaluated based on:
 
 The model uses 20 features per timestamp:
 
-**On-Chain Features**:
+**On-Chain Features** (9):
 1. Receive Count
 2. Sent Count
 3. Unique Addresses
@@ -419,12 +403,12 @@ The model uses 20 features per timestamp:
 8. Block Size
 9. Mining Difficulty
 
-**Market Features**:
+**Market Features** (3):
 10. ETH Close Price
 11. Trading Volume
 12. Market Cap
 
-**Macroeconomic Features**:
+**Macroeconomic Features** (7):
 13. Bitcoin Hash Rate
 14. Bitcoin Price
 15. S&P 500
@@ -433,7 +417,7 @@ The model uses 20 features per timestamp:
 18. VIX (Volatility Index)
 19. UVYX (Volatility ETF)
 
-**Sentiment Features**:
+**Sentiment Features** (2):
 20. Google Trends ("Ethereum" searches)
 21. Tweet Count (Twitter mentions)
 
@@ -460,7 +444,7 @@ Flatten
 
 ### PPO Algorithm
 
-Proximal Policy Optimization combines the advantages of:
+Proximal Policy Optimization combines:
 - **A2C** (Actor-Critic): Two separate networks for policy and value
 - **Trust Region**: Limits policy updates for stability
 - **Clipping**: Prevents overly large changes
@@ -483,56 +467,36 @@ L_TOTAL = L_CLIP - L_VALUE + L_ENTROPY
 
 ---
 
-## Additional Documentation
-
-### Configuration Files
-
-- `requirements.txt`: Python dependencies
-- `Parameters.txt`: Training hyperparameters
-- `.env`: Environment variables (API keys)
-
-### Jupyter Notebooks
-
-- `backtesting_combinations.ipynb`: Testing different strategies
-- `backtesting_prophet.ipynb`: Comparison with Facebook Prophet
-- `exploratory_data_analysis.Rmd`: Exploratory data analysis
-
-### Reports
-
-- `Trading Bot Manuscript version 1.05.pdf`: Complete academic documentation
-
----
-
 ## Project Structure
 
 ```
 ethereum-trading-agent/
 │
-├── reinforcement_learning_trading_agent/
+├── reinforcement_learning_trading_agent/    # CORE PROJECT
 │   ├── env.py                    # Custom Gym environment
 │   ├── models.py                 # PPO model definitions
-│   ├── main.py                   # Training script
+│   ├── main.py                   # Training & backtesting script
 │   ├── utils.py                  # Utility functions
 │   ├── cryptoanalysis_data.csv   # Training data
 │   └── 2026_01_31_10_38_Crypto_trader/  # Trained models
 │       ├── *_Actor.weights.h5
 │       └── *_Critic.weights.h5
 │
-├── flask-api/
+├── flask-api/                               # TEAM EXTENSION
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── app.py                    # Main Flask API
 │   │   │   ├── config.py                 # Configuration
-│   │   │   └── run_trading_bot.py        # Endpoint to launch bot
+│   │   │   └── run_trading_bot.py        # Bot launcher
 │   │   ├── data_handler/
 │   │   │   ├── crypto_news_scraper.py    # News scraping
-│   │   │   ├── technical_indicators.py   # Indicator calculation
+│   │   │   ├── technical_indicators.py   # Indicators
 │   │   │   └── get_historical_eth_data.py
 │   │   └── trading_bot/
-│   │       └── trading_bot.py            # Main trading bot
+│   │       └── trading_bot.py            # Trading bot (experimental)
 │   └── requirements.txt
 │
-├── front-end/
+├── front-end/                               # TEAM EXTENSION
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── leftSideDashboard/        # Transaction history
@@ -550,7 +514,7 @@ ethereum-trading-agent/
 │   ├── cryptoanalysis_data.csv           # Aggregated data
 │   └── ETH_hourly_data.csv               # Hourly prices
 │
-├── progression plots/                     # Progression charts
+├── progression plots/                     # Backtesting results
 │   └── train_trades_plot_episode_*.png
 │
 └── README.md                              # This file
@@ -558,72 +522,91 @@ ethereum-trading-agent/
 
 ---
 
-## Development Workflow
+## Evaluation Metrics
 
-### 1. Data Collection
-```
-Binance API → CSV → Feature Engineering → Training Dataset
-     ↓
-News Scrapers → Sentiment Analysis → Additional Features
-```
+### Backtesting Metrics (Core Project)
 
-### 2. Training
-```
-Load Data → Normalize → Create Gym Environment → PPO Training
-     ↓
-TensorBoard Logging → Model Checkpoints → Best Model Selection
-```
+The model is evaluated on historical data using:
 
-### 3. Backtesting
-```
-Historical Data → Load Model → Simulate Trading → Evaluate Performance
-     ↓
-Trading Charts → Performance Metrics → Strategy Refinement
-```
+- **Episode Reward**: Cumulative reward per episode
+- **Net Worth**: Final portfolio value vs initial
+- **Number of Trades**: Transaction frequency
+- **Profit %**: Return on investment
+- **Sharpe Ratio**: Risk-adjusted returns
+- **Win Rate**: Percentage of profitable trades
 
-### 4. Deployment
-```
-Load Best Model → Connect to Binance WebSocket → Real-time Prediction
-     ↓
-Execute Trades → Log Transactions → Monitor Performance
-```
+### Results Summary
+
+| Metric                | Best Performance     | Average Performance |
+|-----------------------|----------------------|---------------------|
+| Profit (single episode)| +953%               | +150% to +400%      |
+| Sharpe Ratio          | 2.2                  | 1.8-2.0             |
+| Win Rate              | 70%                  | 65-70%              |
+| Trades per Episode    | 60+                  | 15-30               |
+
+**Important**: These metrics are from backtesting only. Real-time performance is not validated.
 
 ---
 
-## Backtesting
+## Additional Documentation
 
-```bash
-cd reinforcement_learning_trading_agent
-python main.py --mode test --episodes 10 --model-path ./2026_01_31_10_38_Crypto_trader
-```
+### Configuration Files
 
-### Simulation Mode
+- `requirements.txt`: Python dependencies
+- `Parameters.txt`: Training hyperparameters
+- `.env`: Environment variables (for extensions)
 
-Enable simulation mode in `.env` to test risk-free:
+### Jupyter Notebooks
 
-```env
-SIMULATION_MODE=True
-```
+- `backtesting_combinations.ipynb`: Strategy comparisons
+- `backtesting_prophet.ipynb`: Comparison with Facebook Prophet
+- `exploratory_data_analysis.Rmd`: Data analysis
+
+### Reports
+
+- `Trading Bot Manuscript version 1.05.pdf`: Complete academic documentation
 
 ---
 
-## Developers
+## Development Team
 
 This project was developed by:
-- **Abdeljalil Sersif** 
-- **Yassin Jador** 
+- **Abdeljalil Sersif** - RL Model Development & Backtesting
+- **Yassin Jador** - Flask API & Frontend Integration
+
 ---
 
 ## Disclaimer
 
-**WARNING**: This project is for educational and research purposes only. Cryptocurrency trading involves significant risks of financial loss. 
+### ⚠️ CRITICAL WARNINGS
 
-- **Never trade with money you cannot afford to lose**
-- **Past performance does not guarantee future results**
-- **Always test in simulation mode before real trading**
-- **Consult a professional financial advisor before investing**
+**This project is STRICTLY for educational and research purposes.**
 
-The developers are not responsible for financial losses resulting from the use of this software.
+1. **Backtesting Only**: The core validated project is limited to backtesting on historical data (2017-2018).
+
+2. **No Real-Time Validation**: The extended features (Flask API, Frontend) are experimental and NOT validated for live trading.
+
+3. **Financial Risk**: Cryptocurrency trading involves significant risk of financial loss.
+   - **Never trade with money you cannot afford to lose**
+   - **Past performance does not guarantee future results**
+   - **The agent has NOT been tested in real market conditions**
+
+4. **Not Financial Advice**: This project does not constitute financial advice. Consult a licensed financial advisor before making investment decisions.
+
+5. **No Warranty**: The developers provide this software "as is" without warranties of any kind and are not responsible for any financial losses.
+
+### Recommended Use
+
+✅ **Appropriate Uses:**
+- Learning about reinforcement learning algorithms
+- Understanding PPO implementation
+- Studying backtesting methodologies
+- Academic research on algorithmic trading
+
+❌ **Inappropriate Uses:**
+- Real money trading without extensive additional validation
+- Production deployment without proper risk management
+- Assuming backtesting results will transfer to live markets
 
 ---
 
@@ -634,13 +617,22 @@ This project was inspired by:
 - The OpenAI Gym community
 - Proximal Policy Optimization researchers (Schulman et al., 2017)
 
-Thanks to all open-source contributors who made this project possible!
+Special thanks to all open-source contributors who made this project possible!
+
+---
+
+## Academic Context
+
+**Project Type**: Reinforcement Learning Research Project  
+**Scope**: PPO agent trained and evaluated on historical Ethereum price data  
+**Validation**: Backtesting only, no real-time deployment  
+**Extensions**: Flask API and React frontend added by team for exploration
 
 ---
 
 <div align="center">
 
-**If this project was useful to you, don't forget to give it a star!**
+**If this project was useful for your learning, don't forget to give it a star!**
 
 Developed by Abdeljalil Sersif & Yassin Jador
 
