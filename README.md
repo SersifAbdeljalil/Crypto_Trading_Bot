@@ -1,5 +1,4 @@
-# Ethereum Automated Trading Agent
-
+## PPO agent trained on Ethereum price data; backtesting only.
 <div align="center">
 
 ![Ethereum Trading](https://img.shields.io/badge/Crypto-Ethereum-blue)
@@ -8,65 +7,65 @@
 ![TensorFlow](https://img.shields.io/badge/Framework-TensorFlow-orange)
 ![Status](https://img.shields.io/badge/Status-In_Development-red)
 
-**Agent de trading automatique basé sur l'apprentissage par renforcement (Reinforcement Learning) pour le trading d'Ethereum**
+**Automated trading agent based on Reinforcement Learning for Ethereum trading**
 
-[Démo](#démo) • [Installation](#installation) • [Documentation](#documentation) • [Problèmes Connus](#problèmes-connus)
+[Demo](#demo) • [Installation](#installation) • [Documentation](#documentation) • [Known Issues](#known-issues)
 
 </div>
 
 ---
 
-> **Note**: Pour voir toutes les images référencées dans ce README, assurez-vous que les fichiers suivants sont placés à la racine du projet:
-> - `frontend.png` - Capture d'écran de l'interface
-> - `train_trades_plot_episode_*.png` - Graphiques de backtesting (dans le dossier du projet RL)
+> **Note**: To see all images referenced in this README, ensure the following files are placed at the project root:
+> - `frontend.png` - Interface screenshot
+> - `train_trades_plot_episode_*.png` - Backtesting charts (in the RL project folder)
 
 ---
 
-## Table des Matières
+## Table of Contents
 
-- [À Propos du Projet](#à-propos-du-projet)
-- [Architecture du Système](#architecture-du-système)
-- [Résultats du Backtesting](#résultats-du-backtesting)
-- [Technologies Utilisées](#technologies-utilisées)
+- [About the Project](#about-the-project)
+- [System Architecture](#system-architecture)
+- [Backtesting Results](#backtesting-results)
+- [Technologies Used](#technologies-used)
 - [Installation](#installation)
-- [Utilisation](#utilisation)
-- [Interface Frontend](#interface-frontend)
-- [Problèmes Connus](#problèmes-connus)
+- [Usage](#usage)
+- [Frontend Interface](#frontend-interface)
+- [Known Issues](#known-issues)
 
 ---
 
-## À Propos du Projet
+## About the Project
 
-Ce projet implémente un **agent de trading automatique** qui utilise l'algorithme **PPO (Proximal Policy Optimization)** pour prendre des décisions de trading sur Ethereum (ETH/USDT). L'agent a été entraîné sur des données historiques et est capable d'analyser les conditions du marché en temps réel pour exécuter des transactions automatiques.
+This project implements an **automated trading agent** that uses the **PPO (Proximal Policy Optimization)** algorithm to make trading decisions on Ethereum (ETH/USDT). The agent has been trained on historical data and is capable of analyzing real-time market conditions to execute automatic transactions.
 
-### Objectifs du Projet
+### Project Objectives
 
-- Développer un agent RL capable de trader automatiquement sur Ethereum
-- Backtester la stratégie sur des données historiques
-- Déployer l'agent sur des données en temps réel via l'API Binance
-- Créer une interface web pour visualiser les performances
-- Optimiser les décisions en temps réel (en cours)
+- Develop an RL agent capable of automatically trading Ethereum
+- Backtest the strategy on historical data
+- Deploy the agent on real-time data via the Binance API
+- Create a web interface to visualize performance
+- Optimize real-time decisions (in progress)
 
-### Fonctionnalités Principales
+### Main Features
 
-- **Intelligence Artificielle**: Agent PPO (Actor-Critic) entraîné avec TensorFlow/Keras
-- **Analyse Technique**: Intégration de 20+ indicateurs techniques et fondamentaux
-- **Trading en Temps Réel**: Connexion WebSocket à Binance pour les données live
-- **Backtesting**: Tests sur données historiques avec visualisation des performances
-- **Interface Web**: Dashboard React/Gatsby pour monitoring en temps réel
-- **Actualités Crypto**: Scraping automatique des news pour analyse de sentiment
+- **Artificial Intelligence**: PPO Agent (Actor-Critic) trained with TensorFlow/Keras
+- **Technical Analysis**: Integration of 20+ technical and fundamental indicators
+- **Real-Time Trading**: WebSocket connection to Binance for live data
+- **Backtesting**: Tests on historical data with performance visualization
+- **Web Interface**: React/Gatsby dashboard for real-time monitoring
+- **Crypto News**: Automatic news scraping for sentiment analysis
 
 ---
 
-## Architecture du Système
+## System Architecture
 
-Le projet est divisé en plusieurs composants principaux:
+The project is divided into several main components:
 
 ```
 Ethereum Trading Agent
 │
 ├── Reinforcement Learning Model
-│   ├── Agent PPO (Actor-Critic)
+│   ├── PPO Agent (Actor-Critic)
 │   ├── Backtesting Engine
 │   └── Training Pipeline
 │
@@ -88,75 +87,75 @@ Ethereum Trading Agent
     └── Feature Engineering
 ```
 
-### Composants Détaillés
+### Detailed Components
 
-#### 1. Modèle RL (PPO Agent)
-- **Algorithme**: Proximal Policy Optimization (PPO)
+#### 1. RL Model (PPO Agent)
+- **Algorithm**: Proximal Policy Optimization (PPO)
 - **Architecture**: CNN + Dense Layers
-- **État**: Fenêtre glissante de 30-50 bougies avec 20 features
-- **Actions**: 3 actions possibles (HOLD, BUY, SELL)
-- **Récompense**: Basée sur le profit et les frais de transaction
+- **State**: Sliding window of 30-50 candles with 20 features
+- **Actions**: 3 possible actions (HOLD, BUY, SELL)
+- **Reward**: Based on profit and transaction fees
 
-#### 2. API Flask Backend
-- Collecte de données en temps réel depuis Binance
-- Scraping des actualités crypto (CoinDesk, CoinTelegraph, etc.)
-- Calcul d'indicateurs techniques (RSI, MACD, Bollinger Bands, etc.)
-- Gestion des ordres de trading
+#### 2. Flask API Backend
+- Real-time data collection from Binance
+- Crypto news scraping (CoinDesk, CoinTelegraph, etc.)
+- Technical indicator calculation (RSI, MACD, Bollinger Bands, etc.)
+- Trading order management
 
-#### 3. Frontend React/Gatsby
-- Visualisation des graphiques de prix (TradingView)
-- Affichage de l'historique des transactions
-- Monitoring des performances en temps réel
-- Indicateurs de statut du bot (ACTIF/ARRÊTÉ)
+#### 3. React/Gatsby Frontend
+- Price chart visualization (TradingView)
+- Transaction history display
+- Real-time performance monitoring
+- Bot status indicators (ACTIVE/STOPPED)
 
 ---
 
-## Résultats du Backtesting
+## Backtesting Results
 
-### Performance sur Données Historiques (2017-2018)
+### Performance on Historical Data (2017-2018)
 
-L'agent a été testé sur plusieurs épisodes de trading avec les résultats suivants:
+The agent was tested on several trading episodes with the following results:
 
-| Épisode | Net Worth Initial | Net Worth Final | Profit | Nb. Transactions |
+| Episode | Initial Net Worth | Final Net Worth | Profit | No. Transactions |
 |---------|------------------|-----------------|--------|------------------|
 | 0       | $10,000          | $12,707         | +27.07% | 8                |
 | 268     | $10,000          | $58,233         | +482%   | 45+              |
-| Meilleur| $10,000          | $105,397        | +953%   | 60+              |
+| Best    | $10,000          | $105,397        | +953%   | 60+              |
 
-### Visualisations des Performances
+### Performance Visualizations
 
-#### Exemples d'Épisodes de Trading Réussis
+#### Examples of Successful Trading Episodes
 
-**Épisode 268 - Profit de +482%**
+**Episode 268 - Profit of +482%**
 
 ![Backtest Episode 268](./Reinforcement_Learning/reinforcement_learning_trading_agent/train_trades_plot_episode_268.png)
 
-*L'agent a réussi à identifier les points d'entrée et de sortie optimaux pendant la bulle de 2017-2018, générant un profit de +482%.*
+*The agent successfully identified optimal entry and exit points during the 2017-2018 bubble, generating a profit of +482%.*
 
-**Épisode 26 - Trading Optimal**
+**Episode 26 - Optimal Trading**
 
 ![Backtest Episode 26](./Reinforcement_Learning/reinforcement_learning_trading_agent/train_trades_plot_episode_26.png)
 
-*Exemple de trading avec timing précis sur les mouvements de prix.*
+*Example of trading with precise timing on price movements.*
 
-**Progression de l'Apprentissage**
+**Learning Progression**
 
-| Épisode | Image de Trading |
-|---------|------------------|
+| Episode | Trading Image |
+|---------|---------------|
 | 0       | ![Episode 0](./Reinforcement_Learning/reinforcement_learning_trading_agent/train_trades_plot_episode_0.png) |
 | 10      | ![Episode 10](./Reinforcement_Learning/reinforcement_learning_trading_agent/train_trades_plot_episode_10.png) |
 | 268     | ![Episode 268](./Reinforcement_Learning/reinforcement_learning_trading_agent/train_trades_plot_episode_268.png) |
 | 323     | ![Episode 323](./Reinforcement_Learning/reinforcement_learning_trading_agent/train_trades_plot_episode_323.png) |
 
-**Indicateurs de Performance**:
-- Taux de réussite: ~65-70% sur les données de backtesting
-- Profit maximum observé: +953% sur un épisode
-- Nombre moyen de trades par épisode: 15-30
-- Ratio Sharpe: 1.8-2.2 (selon l'épisode)
+**Performance Indicators**:
+- Success rate: ~65-70% on backtesting data
+- Maximum profit observed: +953% on one episode
+- Average number of trades per episode: 15-30
+- Sharpe Ratio: 1.8-2.2 (depending on episode)
 
-### Galerie Complète des Résultats de Backtesting
+### Complete Gallery of Backtesting Results
 
-Vous pouvez consulter l'ensemble des graphiques de progression dans le dossier:
+You can view all progression charts in the folder:
 ```
 reinforcement_learning_trading_agent/
 ├── train_trades_plot_episode_0.png
@@ -164,252 +163,252 @@ reinforcement_learning_trading_agent/
 ├── train_trades_plot_episode_10.png
 ├── train_trades_plot_episode_268.png
 ├── train_trades_plot_episode_323.png
-└── ... (plus de 30 épisodes disponibles)
+└── ... (30+ episodes available)
 ```
 
-**Épisodes Clés à Consulter**:
-- **Épisode 0**: Première exécution, apprentissage initial
-- **Épisodes 10-15**: Amélioration progressive des stratégies
-- **Épisode 268**: Performance exceptionnelle (+482% de profit)
-- **Épisode 323**: Stratégie optimisée avancée
+**Key Episodes to Review**:
+- **Episode 0**: First execution, initial learning
+- **Episodes 10-15**: Progressive improvement of strategies
+- **Episode 268**: Exceptional performance (+482% profit)
+- **Episode 323**: Advanced optimized strategy
 
 ---
 
-## Technologies Utilisées
+## Technologies Used
 
-### Machine Learning & IA
-- **TensorFlow/Keras**: Framework principal pour le modèle RL
-- **NumPy/Pandas**: Manipulation et analyse des données
-- **Gym**: Environnement d'entraînement RL personnalisé
+### Machine Learning & AI
+- **TensorFlow/Keras**: Main framework for the RL model
+- **NumPy/Pandas**: Data manipulation and analysis
+- **Gym**: Custom RL training environment
 
 ### Backend
-- **Flask**: API REST pour le backend
-- **WebSocket**: Connexion temps réel à Binance
-- **Python-Binance**: Client API pour Binance
-- **Beautiful Soup**: Scraping des actualités crypto
+- **Flask**: REST API for backend
+- **WebSocket**: Real-time connection to Binance
+- **Python-Binance**: API client for Binance
+- **Beautiful Soup**: Crypto news scraping
 
 ### Frontend
-- **React**: Bibliothèque UI
-- **Gatsby**: Framework SSG pour React
-- **TradingView Widgets**: Graphiques de trading avancés
-- **Chart.js**: Visualisations personnalisées
+- **React**: UI library
+- **Gatsby**: SSG framework for React
+- **TradingView Widgets**: Advanced trading charts
+- **Chart.js**: Custom visualizations
 
-### Base de Données & Stockage
-- **CSV Files**: Stockage des données historiques
-- **TensorBoard**: Visualisation des métriques d'entraînement
+### Database & Storage
+- **CSV Files**: Historical data storage
+- **TensorBoard**: Training metrics visualization
 
 ---
 
 ## Installation
 
-### Prérequis
+### Prerequisites
 
 - Python 3.8+
 - Node.js 14+
-- npm ou yarn
-- Compte Binance (pour le trading réel)
+- npm or yarn
+- Binance account (for real trading)
 
-### 1. Cloner le Repository
+### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/votre-username/ethereum-trading-agent.git
+git clone https://github.com/your-username/ethereum-trading-agent.git
 cd ethereum-trading-agent
 ```
 
-### 2. Installation du Backend (RL Model + Flask API)
+### 2. Backend Installation (RL Model + Flask API)
 
 ```bash
-# Créer un environnement virtuel
+# Create a virtual environment
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-# ou
+# or
 venv\Scripts\activate  # Windows
 
-# Installer les dépendances
+# Install dependencies
 cd reinforcement_learning_trading_agent
 pip install -r requirements.txt
 
-# Configuration des variables d'environnement
+# Configure environment variables
 cd ../flask-api
 cp .env.example .env
-# Éditer .env avec vos clés API Binance
+# Edit .env with your Binance API keys
 ```
 
-### 3. Installation du Frontend
+### 3. Frontend Installation
 
 ```bash
 cd front-end
 npm install
-# ou
+# or
 yarn install
 ```
 
 ### 4. Configuration
 
-Créer un fichier `.env` dans `flask-api/`:
+Create a `.env` file in `flask-api/`:
 
 ```env
-SECRET_KEY=votre_clef_secrete
-API_KEY=votre_binance_api_key
-API_SECRET=votre_binance_api_secret
+SECRET_KEY=your_secret_key
+API_KEY=your_binance_api_key
+API_SECRET=your_binance_api_secret
 TRADE_SYMBOL=ETHUSDT
 TRADE_QUANTITY=0.05
-SIMULATION_MODE=True  # Mettre à False pour trader en réel
+SIMULATION_MODE=True  # Set to False for real trading
 ```
 
-**IMPORTANT**: Ne partagez JAMAIS vos clés API. Ajoutez `.env` dans votre `.gitignore`.
+**IMPORTANT**: NEVER share your API keys. Add `.env` to your `.gitignore`.
 
 ---
 
-## Utilisation
+## Usage
 
-### 1. Entraîner le Modèle (Optionnel)
+### 1. Train the Model (Optional)
 
 ```bash
 cd reinforcement_learning_trading_agent
 python main.py --mode train --episodes 500 --batch-size 500
 ```
 
-### 2. Lancer l'API Flask
+### 2. Launch the Flask API
 
 ```bash
 cd flask-api/src
 python app/app.py
 ```
 
-L'API sera accessible sur `http://localhost:5000`
+The API will be accessible at `http://localhost:5000`
 
-### 3. Lancer le Bot de Trading
+### 3. Launch the Trading Bot
 
 ```bash
 cd flask-api/src
 python trading_bot/trading_bot.py
 ```
 
-Le bot se connectera à Binance via WebSocket et commencera à analyser le marché.
+The bot will connect to Binance via WebSocket and start analyzing the market.
 
-### 4. Lancer le Frontend
+### 4. Launch the Frontend
 
 ```bash
 cd front-end
 npm run develop
-# ou
+# or
 yarn develop
 ```
 
-L'interface sera accessible sur `http://localhost:8000`
+The interface will be accessible at `http://localhost:8000`
 
 ---
 
-## Interface Frontend
+## Frontend Interface
 
-### Dashboard Principal
+### Main Dashboard
 
-L'interface affiche plusieurs sections:
+The interface displays several sections:
 
-1. **Graphique de Prix**: TradingView widget avec chandelier en temps réel
-2. **Indicateurs Techniques**: RSI, MACD, Bollinger Bands, etc.
-3. **Historique des Transactions**: Liste des derniers achats/ventes
-4. **Actualités Crypto**: News en temps réel
-5. **Prédictions du Modèle**: Probabilités pour HOLD/BUY/SELL
-6. **Statistiques de Performance**: Profit net, taux de réussite, etc.
+1. **Price Chart**: TradingView widget with real-time candlesticks
+2. **Technical Indicators**: RSI, MACD, Bollinger Bands, etc.
+3. **Transaction History**: List of recent buys/sells
+4. **Crypto News**: Real-time news
+5. **Model Predictions**: Probabilities for HOLD/BUY/SELL
+6. **Performance Statistics**: Net profit, success rate, etc.
 
-### Contrôle du Bot
+### Bot Control
 
-L'interface permet de:
-- Démarrer/Arrêter le bot
-- Choisir le mode (Simulation/Réel)
-- Définir la quantité de trading
-- Voir le statut en temps réel
+The interface allows you to:
+- Start/Stop the bot
+- Choose the mode (Simulation/Real)
+- Set trading quantity
+- See real-time status
 
-**Capture d'écran de l'interface:**
+**Interface Screenshot:**
 
 ![Frontend Dashboard](./frontend.png)
 
-*Interface complète montrant les graphiques TradingView, l'historique des transactions, les actualités crypto et les contrôles du bot.*
+*Complete interface showing TradingView charts, transaction history, crypto news, and bot controls.*
 
 ---
 
-## Problèmes Connus
+## Known Issues
 
-### Problème Principal: Agent Reste en Mode HOLD
+### Main Issue: Agent Stays in HOLD Mode
 
-**Description**: Lors de l'exécution en temps réel, l'agent prédit principalement l'action HOLD et ne génère pas de signaux BUY ou SELL, même dans des conditions de marché favorables.
+**Description**: During real-time execution, the agent mainly predicts the HOLD action and does not generate BUY or SELL signals, even in favorable market conditions.
 
-**Symptômes**:
-- Probabilité HOLD > 60-80%
-- Probabilité BUY/SELL < 20%
-- Aucune transaction exécutée pendant de longues périodes
+**Symptoms**:
+- HOLD probability > 60-80%
+- BUY/SELL probability < 20%
+- No transactions executed for long periods
 
-**Causes Potentielles**:
+**Potential Causes**:
 
-1. **Décalage de Distribution (Distribution Shift)**
-   - L'agent a été entraîné sur des données historiques (2017-2018)
-   - Les patterns de marché actuels diffèrent significativement
-   - Les features externes ne sont pas suffisamment dynamiques
+1. **Distribution Shift**
+   - The agent was trained on historical data (2017-2018)
+   - Current market patterns differ significantly
+   - External features are not dynamic enough
 
-2. **Seuil de Confiance Trop Élevé**
-   - Le seuil MIN_CONFIDENCE (35%) peut être trop conservateur
-   - L'agent préfère la sécurité au risque
+2. **Confidence Threshold Too High**
+   - The MIN_CONFIDENCE threshold (35%) may be too conservative
+   - The agent prefers safety over risk
 
-3. **Features Statiques**
-   - Les données externes (Google Trends, VIX, etc.) ne varient pas assez
-   - Le modèle ne perçoit pas de changements significatifs dans l'état
+3. **Static Features**
+   - External data (Google Trends, VIX, etc.) doesn't vary enough
+   - The model doesn't perceive significant changes in state
 
-4. **Normalisation Incorrecte**
-   - Les valeurs normalisées peuvent ne pas refléter la volatilité réelle
-   - Biais vers les valeurs moyennes observées pendant l'entraînement
+4. **Incorrect Normalization**
+   - Normalized values may not reflect real volatility
+   - Bias towards average values observed during training
 
-**Solutions en Cours**:
+**Solutions in Progress**:
 
-**Implémentées**:
-- Ajout de données API CoinGecko en temps réel
-- Variation des features selon la tendance du prix
-- Logging détaillé des prédictions
+**Implemented**:
+- Addition of real-time CoinGecko API data
+- Feature variation based on price trend
+- Detailed prediction logging
 
-**En Développement**:
-- Ré-entraînement sur des données récentes (2023-2025)
-- Fine-tuning avec des données live
-- Ajustement dynamique du seuil de confiance
-- Augmentation de la diversité des features
+**In Development**:
+- Retraining on recent data (2023-2025)
+- Fine-tuning with live data
+- Dynamic confidence threshold adjustment
+- Increased feature diversity
 
-**À Tester**:
-- Modification de la fonction de récompense
-- Exploration forcée (epsilon-greedy)
-- Ensemble de modèles avec vote majoritaire
+**To Test**:
+- Modification of reward function
+- Forced exploration (epsilon-greedy)
+- Ensemble of models with majority voting
 
 ---
 
-## Métriques et Évaluation
+## Metrics and Evaluation
 
-### Métriques d'Entraînement
+### Training Metrics
 
-Le modèle est évalué selon:
+The model is evaluated based on:
 
-- **Episode Reward**: Récompense cumulée par épisode
-- **Net Worth**: Valeur finale du portefeuille
-- **Number of Trades**: Nombre de transactions effectuées
-- **Actor Loss**: Perte de la politique (Actor)
-- **Critic Loss**: Perte de la fonction de valeur (Critic)
+- **Episode Reward**: Cumulative reward per episode
+- **Net Worth**: Final portfolio value
+- **Number of Trades**: Number of transactions executed
+- **Actor Loss**: Policy loss (Actor)
+- **Critic Loss**: Value function loss (Critic)
 
 ### Backtesting vs Live Trading
 
-| Métrique              | Backtesting (2017-2018) | Live Trading (2025) |
+| Metric                | Backtesting (2017-2018) | Live Trading (2025) |
 |-----------------------|-------------------------|---------------------|
-| Profit moyen          | +150% à +900%           | 0% (HOLD only)      |
-| Trades par jour       | 5-10                    | 0-1                 |
-| Taux de réussite      | 65-70%                  | N/A                 |
+| Average profit        | +150% to +900%          | 0% (HOLD only)      |
+| Trades per day        | 5-10                    | 0-1                 |
+| Success rate          | 65-70%                  | N/A                 |
 | Sharpe Ratio          | 1.8-2.2                 | N/A                 |
 
 ---
 
-## Approche Technique
+## Technical Approach
 
 ### Feature Engineering
 
-Le modèle utilise 20 features par timestamp:
+The model uses 20 features per timestamp:
 
-**Features On-Chain**:
+**On-Chain Features**:
 1. Receive Count
 2. Sent Count
 3. Unique Addresses
@@ -420,12 +419,12 @@ Le modèle utilise 20 features par timestamp:
 8. Block Size
 9. Mining Difficulty
 
-**Features de Marché**:
+**Market Features**:
 10. ETH Close Price
 11. Trading Volume
 12. Market Cap
 
-**Features Macro-économiques**:
+**Macroeconomic Features**:
 13. Bitcoin Hash Rate
 14. Bitcoin Price
 15. S&P 500
@@ -434,11 +433,11 @@ Le modèle utilise 20 features par timestamp:
 18. VIX (Volatility Index)
 19. UVYX (Volatility ETF)
 
-**Features de Sentiment**:
-20. Google Trends (recherches "Ethereum")
-21. Tweet Count (mentions Twitter)
+**Sentiment Features**:
+20. Google Trends ("Ethereum" searches)
+21. Tweet Count (Twitter mentions)
 
-### Architecture du Modèle
+### Model Architecture
 
 **Shared Model (Actor-Critic)**:
 
@@ -459,12 +458,12 @@ Flatten
     │   [HOLD, BUY, SELL]           │
 ```
 
-### Algorithme PPO
+### PPO Algorithm
 
-Proximal Policy Optimization combine les avantages de:
-- **A2C** (Actor-Critic): Deux réseaux séparés pour la politique et la valeur
-- **Trust Region**: Limite les mises à jour de politique pour stabilité
-- **Clipping**: Empêche les changements trop importants
+Proximal Policy Optimization combines the advantages of:
+- **A2C** (Actor-Critic): Two separate networks for policy and value
+- **Trust Region**: Limits policy updates for stability
+- **Clipping**: Prevents overly large changes
 
 **Loss Functions**:
 
@@ -484,91 +483,91 @@ L_TOTAL = L_CLIP - L_VALUE + L_ENTROPY
 
 ---
 
-## Documentation Supplémentaire
+## Additional Documentation
 
-### Fichiers de Configuration
+### Configuration Files
 
-- `requirements.txt`: Dépendances Python
-- `Parameters.txt`: Hyperparamètres d'entraînement
-- `.env`: Variables d'environnement (API keys)
+- `requirements.txt`: Python dependencies
+- `Parameters.txt`: Training hyperparameters
+- `.env`: Environment variables (API keys)
 
-### Notebooks Jupyter
+### Jupyter Notebooks
 
-- `backtesting_combinations.ipynb`: Tests de différentes stratégies
-- `backtesting_prophet.ipynb`: Comparaison avec Facebook Prophet
-- `exploratory_data_analysis.Rmd`: Analyse exploratoire des données
+- `backtesting_combinations.ipynb`: Testing different strategies
+- `backtesting_prophet.ipynb`: Comparison with Facebook Prophet
+- `exploratory_data_analysis.Rmd`: Exploratory data analysis
 
-### Rapports
+### Reports
 
-- `Trading Bot Manuscript version 1.05.pdf`: Documentation académique complète
+- `Trading Bot Manuscript version 1.05.pdf`: Complete academic documentation
 
 ---
 
-## Structure du Projet
+## Project Structure
 
 ```
 ethereum-trading-agent/
 │
 ├── reinforcement_learning_trading_agent/
-│   ├── env.py                    # Environnement Gym personnalisé
-│   ├── models.py                 # Définition des modèles PPO
-│   ├── main.py                   # Script d'entraînement
-│   ├── utils.py                  # Fonctions utilitaires
-│   ├── cryptoanalysis_data.csv   # Données d'entraînement
-│   └── 2026_01_31_10_38_Crypto_trader/  # Modèles entraînés
+│   ├── env.py                    # Custom Gym environment
+│   ├── models.py                 # PPO model definitions
+│   ├── main.py                   # Training script
+│   ├── utils.py                  # Utility functions
+│   ├── cryptoanalysis_data.csv   # Training data
+│   └── 2026_01_31_10_38_Crypto_trader/  # Trained models
 │       ├── *_Actor.weights.h5
 │       └── *_Critic.weights.h5
 │
 ├── flask-api/
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── app.py                    # API Flask principale
+│   │   │   ├── app.py                    # Main Flask API
 │   │   │   ├── config.py                 # Configuration
-│   │   │   └── run_trading_bot.py        # Endpoint pour lancer le bot
+│   │   │   └── run_trading_bot.py        # Endpoint to launch bot
 │   │   ├── data_handler/
-│   │   │   ├── crypto_news_scraper.py    # Scraping actualités
-│   │   │   ├── technical_indicators.py   # Calcul indicateurs
+│   │   │   ├── crypto_news_scraper.py    # News scraping
+│   │   │   ├── technical_indicators.py   # Indicator calculation
 │   │   │   └── get_historical_eth_data.py
 │   │   └── trading_bot/
-│   │       └── trading_bot.py            # Bot de trading principal
+│   │       └── trading_bot.py            # Main trading bot
 │   └── requirements.txt
 │
 ├── front-end/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── leftSideDashboard/        # Historique transactions
-│   │   │   ├── middleDashboard/          # Graphiques TradingView
-│   │   │   ├── rightSideDashboard/       # Contrôles & statut
-│   │   │   └── technicalIndicators/      # Indicateurs techniques
+│   │   │   ├── leftSideDashboard/        # Transaction history
+│   │   │   ├── middleDashboard/          # TradingView charts
+│   │   │   ├── rightSideDashboard/       # Controls & status
+│   │   │   └── technicalIndicators/      # Technical indicators
 │   │   ├── pages/
-│   │   │   └── index.js                  # Page principale
+│   │   │   └── index.js                  # Main page
 │   │   └── images/
 │   ├── gatsby-config.js
 │   └── package.json
 │
 ├── output_data/
-│   ├── transaction_history.csv           # Historique des trades
-│   ├── cryptoanalysis_data.csv           # Données agrégées
-│   └── ETH_hourly_data.csv               # Prix horaires
+│   ├── transaction_history.csv           # Trade history
+│   ├── cryptoanalysis_data.csv           # Aggregated data
+│   └── ETH_hourly_data.csv               # Hourly prices
 │
-├── progression plots/                     # Graphiques de progression
+├── progression plots/                     # Progression charts
 │   └── train_trades_plot_episode_*.png
 │
-└── README.md                              # Ce fichier
+└── README.md                              # This file
 ```
 
 ---
 
-## Workflow de Développement
+## Development Workflow
 
-### 1. Collecte de Données
+### 1. Data Collection
 ```
 Binance API → CSV → Feature Engineering → Training Dataset
      ↓
 News Scrapers → Sentiment Analysis → Additional Features
 ```
 
-### 2. Entraînement
+### 2. Training
 ```
 Load Data → Normalize → Create Gym Environment → PPO Training
      ↓
@@ -582,7 +581,7 @@ Historical Data → Load Model → Simulate Trading → Evaluate Performance
 Trading Charts → Performance Metrics → Strategy Refinement
 ```
 
-### 4. Déploiement
+### 4. Deployment
 ```
 Load Best Model → Connect to Binance WebSocket → Real-time Prediction
      ↓
@@ -600,7 +599,7 @@ python main.py --mode test --episodes 10 --model-path ./2026_01_31_10_38_Crypto_
 
 ### Simulation Mode
 
-Activez le mode simulation dans `.env` pour tester sans risque:
+Enable simulation mode in `.env` to test risk-free:
 
 ```env
 SIMULATION_MODE=True
@@ -608,41 +607,41 @@ SIMULATION_MODE=True
 
 ---
 
-## Développeurs
+## Developers
 
-Ce projet a été développé par:
+This project was developed by:
 - **Abdeljalil Sersif** 
 - **Yassin Jador** 
 ---
 
-## Avertissement
+## Disclaimer
 
-**ATTENTION**: Ce projet est à des fins éducatives et de recherche uniquement. Le trading de cryptomonnaies comporte des risques importants de perte financière. 
+**WARNING**: This project is for educational and research purposes only. Cryptocurrency trading involves significant risks of financial loss. 
 
-- **Ne tradez jamais avec de l'argent que vous ne pouvez pas vous permettre de perdre**
-- **Les performances passées ne garantissent pas les résultats futurs**
-- **Testez toujours en mode simulation avant le trading réel**
-- **Consultez un conseiller financier professionnel avant d'investir**
+- **Never trade with money you cannot afford to lose**
+- **Past performance does not guarantee future results**
+- **Always test in simulation mode before real trading**
+- **Consult a professional financial advisor before investing**
 
-Les développeurs ne sont pas responsables des pertes financières résultant de l'utilisation de ce logiciel.
+The developers are not responsible for financial losses resulting from the use of this software.
 
 ---
 
-## Remerciements
+## Acknowledgments
 
-Ce projet s'inspire de:
-- [RL-Bitcoin-trading-bot](https://github.com/pythonlessons/RL-Bitcoin-trading-bot) par pythonlessons
-- La communauté OpenAI Gym
-- Les chercheurs de Proximal Policy Optimization (Schulman et al., 2017)
+This project was inspired by:
+- [RL-Bitcoin-trading-bot](https://github.com/pythonlessons/RL-Bitcoin-trading-bot) by pythonlessons
+- The OpenAI Gym community
+- Proximal Policy Optimization researchers (Schulman et al., 2017)
 
-Merci à tous les contributeurs open-source qui ont rendu ce projet possible!
+Thanks to all open-source contributors who made this project possible!
 
 ---
 
 <div align="center">
 
-**Si ce projet vous a été utile, n'oubliez pas de lui donner une étoile!**
+**If this project was useful to you, don't forget to give it a star!**
 
-Développé par Abdeljalil Sersif & Yassin Jador
+Developed by Abdeljalil Sersif & Yassin Jador
 
 </div>
