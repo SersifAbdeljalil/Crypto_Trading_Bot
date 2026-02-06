@@ -129,13 +129,13 @@ L'agent a été testé sur plusieurs épisodes de trading avec les résultats su
 
 **Épisode 268 - Profit de +482%**
 
-![Backtest Episode 268](./reinforcement_learning_trading_agent/train_trades_plot_episode_268.png)
+![Backtest Episode 268](./Reinforcement_Learning/reinforcement_learning_trading_agent/train_trades_plot_episode_268.png)
 
 *L'agent a réussi à identifier les points d'entrée et de sortie optimaux pendant la bulle de 2017-2018, générant un profit de +482%.*
 
 **Épisode 26 - Trading Optimal**
 
-![Backtest Episode 26](./reinforcement_learning_trading_agent/train_trades_plot_episode_26.png)
+![Backtest Episode 26](./Reinforcement_Learning/reinforcement_learning_trading_agent/train_trades_plot_episode_26.png)
 
 *Exemple de trading avec timing précis sur les mouvements de prix.*
 
@@ -143,10 +143,10 @@ L'agent a été testé sur plusieurs épisodes de trading avec les résultats su
 
 | Épisode | Image de Trading |
 |---------|------------------|
-| 0       | ![Episode 0](./reinforcement_learning_trading_agent/train_trades_plot_episode_0.png) |
-| 10      | ![Episode 10](./reinforcement_learning_trading_agent/train_trades_plot_episode_10.png) |
-| 268     | ![Episode 268](./reinforcement_learning_trading_agent/train_trades_plot_episode_268.png) |
-| 323     | ![Episode 323](./reinforcement_learning_trading_agent/train_trades_plot_episode_323.png) |
+| 0       | ![Episode 0](./Reinforcement_Learning/reinforcement_learning_trading_agent/train_trades_plot_episode_0.png) |
+| 10      | ![Episode 10](./Reinforcement_Learning/reinforcement_learning_trading_agent/train_trades_plot_episode_10.png) |
+| 268     | ![Episode 268](./Reinforcement_Learning/reinforcement_learning_trading_agent/train_trades_plot_episode_268.png) |
+| 323     | ![Episode 323](./Reinforcement_Learning/reinforcement_learning_trading_agent/train_trades_plot_episode_323.png) |
 
 **Indicateurs de Performance**:
 - Taux de réussite: ~65-70% sur les données de backtesting
