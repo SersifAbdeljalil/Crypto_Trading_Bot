@@ -613,7 +613,7 @@ This project was developed by:
 ## Acknowledgments
 
 This project was inspired by:
-- [RL-Bitcoin-trading-bot](https://github.com/pythonlessons/RL-Bitcoin-trading-bot) by pythonlessons
+- [PPO agent trained on Ethereum price data; backtesting only.]([text](https://github.com/roblen001/reinforcement_learning_trading_agent)) by pythonlessons
 - The OpenAI Gym community
 - Proximal Policy Optimization researchers (Schulman et al., 2017)
 
