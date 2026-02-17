@@ -1,0 +1,42 @@
+2026-02-17 10:23:43,650 | INFO | Loaded historical data: 1815 rows, global_min=-37.6300, global_max=42763252557573003411456.0000
+2026-02-17 10:23:43,650 | INFO | RealTimePredictor initialized.
+2026-02-17 10:23:43,651 | INFO |   Model: .\2026_01_22_14_12_Crypto_trader/105397.90_Crypto_trader_Actor.weights.h5
+2026-02-17 10:24:02,037 | INFO | Building Actor network...
+2026-02-17 10:27:35,304 | INFO | Loaded historical data: 1815 rows, global_min=-37.6300, global_max=42763252557573003411456.0000
+2026-02-17 10:27:35,325 | INFO | RealTimePredictor initialized.
+2026-02-17 10:27:35,327 | INFO |   Model: .\2026_01_22_14_12_Crypto_trader/105397.90_Crypto_trader_Actor.weights.h5
+2026-02-17 10:27:47,231 | INFO | Building Actor network...
+2026-02-17 10:27:47,704 | INFO |    Input shape:  (50, 20)
+2026-02-17 10:27:47,705 | INFO |    Architecture: CNN
+2026-02-17 10:27:47,705 | INFO | Warming up state buffer (50 steps)...
+2026-02-17 10:27:48,474 | ERROR | Failed to fetch klines: HTTPSConnectionPool(host='api.binance.com', port=443): Max retries exceeded with url: /api/v3/klines?symbol=ETHUSDT&interval=1h&limit=100 (Caused by SSLError(SSLError(1, '[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:1032)')))
+2026-02-17 10:27:49,059 | ERROR | Failed to fetch market stats: HTTPSConnectionPool(host='api.binance.com', port=443): Max retries exceeded with url: /api/v3/ticker/24hr?symbol=ETHUSDT (Caused by SSLError(SSLError(1, '[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:1032)')))
+2026-02-17 10:27:49,059 | ERROR | Failed to fetch historical data for warm-up.
+2026-02-17 10:27:49,060 | ERROR | Failed to warm up buffer. Check Binance connectivity.
+2026-02-17 10:30:04,507 | INFO | Historical data loaded: 1815 rows
+2026-02-17 10:30:04,507 | INFO | Global range: [0.0100, 18735500523950705737728.0000]
+2026-02-17 10:30:04,508 | INFO | RealTimePredictor initialized.
+2026-02-17 10:30:04,509 | INFO |   Model folder : .\2026_01_22_14_12_Crypto_trader
+2026-02-17 10:30:04,509 | INFO |   Model score  : 105397.90
+2026-02-17 10:30:14,270 | INFO | Building Actor network ...
+2026-02-17 10:30:14,485 | INFO | Model loaded: .\2026_01_22_14_12_Crypto_trader\105397.90_Crypto_trader_Actor.weights.h5
+2026-02-17 10:30:14,485 | INFO |   Input shape  : (50, 20)
+2026-02-17 10:30:14,486 | INFO |   Architecture : CNN
+2026-02-17 10:30:14,486 | INFO | Warming up buffer (50 steps) ...
+2026-02-17 10:30:15,168 | ERROR | OHLC fetch failed: HTTPSConnectionPool(host='api.coingecko.com', port=443): Max retries exceeded with url: /api/v3/coins/ethereum/ohlc?vs_currency=usd&days=14 (Caused by SSLError(SSLError(1, '[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:1032)')))
+2026-02-17 10:30:15,827 | ERROR | Market data fetch failed: HTTPSConnectionPool(host='api.coingecko.com', port=443): Max retries exceeded with url: /api/v3/coins/ethereum?localization=false&tickers=false&community_data=false&developer_data=false (Caused by SSLError(SSLError(1, '[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:1032)')))
+2026-02-17 10:30:15,828 | ERROR | Not enough candles for warm-up.
+2026-02-17 10:30:15,828 | ERROR | Buffer warm-up failed. Check network.
+2026-02-17 10:33:46,329 | INFO | Binance API key loaded from .env
+2026-02-17 10:33:46,366 | INFO | Historical CSV loaded: 1815 rows
+2026-02-17 10:33:46,366 | INFO | RealTimePredictor initialized.
+2026-02-17 10:33:46,366 | INFO |   Model: .\2026_01_22_14_12_Crypto_trader / score=105397.90
+2026-02-17 10:33:54,166 | INFO | Building Actor network ...
+2026-02-17 10:33:54,327 | INFO | Model loaded: .\2026_01_22_14_12_Crypto_trader\105397.90_Crypto_trader_Actor.weights.h5
+2026-02-17 10:33:54,327 | INFO | Warming up buffer (50 steps) ...
+2026-02-17 10:33:54,930 | ERROR | Klines fetch failed: HTTPSConnectionPool(host='api.binance.com', port=443): Max retries exceeded with url: /api/v3/klines?symbol=ETHUSDT&interval=1h&limit=120 (Caused by SSLError(SSLError(1, '[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:1032)')))
+2026-02-17 10:33:54,931 | INFO | Trying CoinGecko fallback for OHLC ...
+2026-02-17 10:33:55,415 | ERROR | CoinGecko fallback failed: HTTPSConnectionPool(host='api.coingecko.com', port=443): Max retries exceeded with url: /api/v3/coins/ethereum/ohlc?vs_currency=usd&days=14 (Caused by SSLError(SSLError(1, '[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:1032)')))
+2026-02-17 10:33:55,952 | ERROR | Market stats failed: HTTPSConnectionPool(host='api.binance.com', port=443): Max retries exceeded with url: /api/v3/ticker/24hr?symbol=ETHUSDT (Caused by SSLError(SSLError(1, '[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:1032)')))
+2026-02-17 10:33:55,952 | ERROR | Not enough candles for warm-up.
+2026-02-17 10:33:55,953 | ERROR | Warm-up failed. Check network.
