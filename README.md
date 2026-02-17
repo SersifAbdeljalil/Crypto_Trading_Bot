@@ -40,7 +40,7 @@ This project implements a **PPO (Proximal Policy Optimization) agent** trained e
 
 ### Project Objectives (Core Requirement)
 
-✅ **Completed:**
+ **Completed:**
 - Develop an RL agent capable of learning Ethereum trading strategies
 - Train the agent on historical data (2017-2018)
 - Backtest the strategy and evaluate performance
@@ -48,15 +48,15 @@ This project implements a **PPO (Proximal Policy Optimization) agent** trained e
 
 ### What This Project IS
 
-- ✅ A **research and educational project** on reinforcement learning for algorithmic trading
-- ✅ A **backtesting framework** to evaluate PPO agent performance on historical data
-- ✅ A **proof-of-concept** demonstrating RL applications in cryptocurrency trading
+-  A **research and educational project** on reinforcement learning for algorithmic trading
+-  A **backtesting framework** to evaluate PPO agent performance on historical data
+-  A **proof-of-concept** demonstrating RL applications in cryptocurrency trading
 
 ### What This Project IS NOT
 
-- ❌ **NOT** a real-time trading system deployed in production
-- ❌ **NOT** tested or validated on live market data
-- ❌ **NOT** financial advice or a guaranteed profitable strategy
+-  **NOT** a real-time trading system deployed in production
+-  **NOT** tested or validated on live market data
+-  **NOT** financial advice or a guaranteed profitable strategy
 
 ---
 
@@ -215,14 +215,14 @@ Extended System Architecture (Team Addition)
 
 *Experimental interface showing TradingView charts, transaction history, crypto news, and bot controls.*
 
-### ⚠️ Important Disclaimer for Extensions
+###  Important Disclaimer for Extensions
 
 **The Flask API and Frontend components are:**
-- ✅ Functional for demonstration and learning purposes
-- ✅ Useful for understanding real-time trading system architecture
-- ❌ **NOT validated for real-time trading** performance
-- ❌ **NOT tested with live market data** beyond basic connectivity
-- ❌ **NOT recommended for actual trading** without extensive additional validation
+-  Functional for demonstration and learning purposes
+-  Useful for understanding real-time trading system architecture
+-  **NOT validated for real-time trading** performance
+-  **NOT tested with live market data** beyond basic connectivity
+-  **NOT recommended for actual trading** without extensive additional validation
 
 **Known Limitations:**
 - Distribution shift between training data (2017-2018) and current market conditions
@@ -341,7 +341,7 @@ cd flask-api/src
 python trading_bot/trading_bot.py
 ```
 
-⚠️ **Always use SIMULATION_MODE=True in .env**
+ **Always use SIMULATION_MODE=True in .env**
 
 #### 3. Launch Frontend Dashboard
 
@@ -578,7 +578,7 @@ This project was developed by:
 
 ## Disclaimer
 
-### ⚠️ CRITICAL WARNINGS
+###  CRITICAL WARNINGS
 
 **This project is STRICTLY for educational and research purposes.**
 
@@ -597,13 +597,12 @@ This project was developed by:
 
 ### Recommended Use
 
-✅ **Appropriate Uses:**
+**Appropriate Uses:**
 - Learning about reinforcement learning algorithms
 - Understanding PPO implementation
 - Studying backtesting methodologies
 - Academic research on algorithmic trading
-
-❌ **Inappropriate Uses:**
+ **Inappropriate Uses:**
 - Real money trading without extensive additional validation
 - Production deployment without proper risk management
 - Assuming backtesting results will transfer to live markets
