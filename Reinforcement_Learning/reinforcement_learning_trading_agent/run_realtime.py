@@ -161,7 +161,7 @@ def run_backtest_on_csv(
     avg_conf   = df_results['confidence'].mean()
 
     print("═"*60)
-    print("  📊 RÉSULTATS BACKTEST")
+    print("   RÉSULTATS BACKTEST")
     print(f"  Période:       {df_results['date'].iloc[0]} → {df_results['date'].iloc[-1]}")
     print(f"  Steps testés:  {n}")
     print(f"  BUY signals:   {buy_count} ({buy_count/n*100:.1f}%)")
@@ -172,7 +172,7 @@ def run_backtest_on_csv(
 
     out_file = "backtest_results.csv"
     df_results.to_csv(out_file, index=False)
-    print(f"  💾 Résultats sauvegardés: {out_file}\n")
+    print(f"  Résultats sauvegardés: {out_file}\n")
     print(df_results.tail(20).to_string(index=False))
 
 
@@ -185,7 +185,7 @@ def alert_strong_signal(result: dict):
     label = result['action_label']
     price = result['price']
     conf  = result['confidence']
-    print(f"\n🔥🔥 ALERTE SIGNAL FORT: {label} @ ${price:,.2f} ({conf:.1f}% confiance) 🔥🔥\n")
+    print(f"\n ALERTE SIGNAL FORT: {label} @ ${price:,.2f} ({conf:.1f}% confiance) 🔥🔥\n")
     # → Vous pouvez ajouter: email, Discord webhook, SMS, etc.
 
 
@@ -261,15 +261,15 @@ def main():
     score  = args.score
 
     if folder is None or score is None:
-        print("🔍 Recherche du meilleur modèle disponible...")
+        print(" Recherche du meilleur modèle disponible...")
         auto_folder, auto_score = pick_best_model()
         if auto_folder is None:
-            print("❌ Aucun modèle trouvé. Spécifiez --folder et --score.")
+            print(" Aucun modèle trouvé. Spécifiez --folder et --score.")
             list_available_models()
             return
         folder = auto_folder
         score  = auto_score
-        print(f"✅ Modèle sélectionné: {os.path.basename(folder)}")
+        print(f"Modèle sélectionné: {os.path.basename(folder)}")
         print(f"   Score: {score}\n")
 
     # ── Initialize predictor ───────────────────────────────────────────
@@ -294,7 +294,7 @@ def main():
         predictor.load_model()
         result = predictor.predict_once()
         if result:
-            print(f"\n✅ Résultat: {result['action_label']} @ ${result['price']:,.2f}")
+            print(f"\nRésultat: {result['action_label']} @ ${result['price']:,.2f}")
             print(f"   Confiance: {result['confidence']}%")
             print(f"   Probabilités: {result['probabilities']}")
         return
